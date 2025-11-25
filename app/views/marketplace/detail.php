@@ -21,11 +21,11 @@ $pageTitle = htmlspecialchars($product['name']);
             <?php endif; ?>
             
             <?php if ($product['stock'] > 0): ?>
-                <form method="POST" action="<?php echo BASE_URL; ?>/?controller=marketplace&action=addToCart">
+                <form method="POST" action="<?php echo BASE_URL; ?>/?controller=marketplace&action=addToCart" id="add-to-cart-form">
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <div class="form-group">
                         <label>Quantité:</label>
-                        <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['stock']; ?>">
+                        <input type="number" name="quantity" value="1" min="1" max="<?php echo $product['stock']; ?>" id="cart-quantity">
                     </div>
                     <button type="submit" class="btn btn-primary">Ajouter au panier</button>
                 </form>

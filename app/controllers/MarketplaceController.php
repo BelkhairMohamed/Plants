@@ -7,11 +7,64 @@ class MarketplaceController extends Controller {
     private $productModel;
     private $orderModel;
     private $userPlantModel;
+    private $cartModel;
     
     public function __construct() {
         $this->productModel = new Product();
         $this->orderModel = new Order();
         $this->userPlantModel = new UserPlant();
+        $this->cartModel = new Cart();
+    }
+    
+    /**
+     * Get cart from database (if logged in) or session (if not logged in)
+     */
+    private function getCart() {
+        if (isset($_SESSION['user_id'])) {
+            // User is logged in - get from database
+            return $this->cartModel->toSessionFormat($_SESSION['user_id']);
+        } else {
+            // User not logged in - get from session
+            return $_SESSION['cart'] ?? [];
+        }
+    }
+    
+    /**
+     * Save cart to database (if logged in) or session (if not logged in)
+     */
+    private function saveCartItem($productId, $quantity) {
+        if (isset($_SESSION['user_id'])) {
+            // User is logged in - save to database
+            return $this->cartModel->addItem($_SESSION['user_id'], $productId, $quantity);
+        } else {
+            // User not logged in - save to session
+            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
+            }
+            
+            $found = false;
+            foreach ($_SESSION['cart'] as $key => &$item) {
+                if (isset($item['product_id']) && $item['product_id'] == $productId) {
+                    $item['quantity'] = (isset($item['quantity']) ? intval($item['quantity']) : 0) + $quantity;
+                    $found = true;
+                    break;
+                }
+            }
+            
+            if (!$found) {
+                $product = $this->productModel->findById($productId);
+                if ($product) {
+                    $_SESSION['cart'][] = [
+                        'product_id' => $productId,
+                        'quantity' => $quantity,
+                        'name' => $product['name'],
+                        'price' => $product['price'],
+                        'image_url' => $product['image_url']
+                    ];
+                }
+            }
+            return true;
+        }
     }
     
     public function index() {
@@ -53,10 +106,6 @@ class MarketplaceController extends Controller {
     }
     
     public function addToCart() {
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $productId = intval($_POST['product_id'] ?? 0);
             $quantity = max(1, intval($_POST['quantity'] ?? 1));
@@ -64,24 +113,11 @@ class MarketplaceController extends Controller {
             if ($productId) {
                 $product = $this->productModel->findById($productId);
                 if ($product && $product['stock'] >= $quantity) {
-                    // Check if already in cart
-                    $found = false;
-                    foreach ($_SESSION['cart'] as &$item) {
-                        if ($item['product_id'] == $productId) {
-                            $item['quantity'] += $quantity;
-                            $found = true;
-                            break;
-                        }
-                    }
+                    $this->saveCartItem($productId, $quantity);
                     
-                    if (!$found) {
-                        $_SESSION['cart'][] = [
-                            'product_id' => $productId,
-                            'quantity' => $quantity,
-                            'name' => $product['name'],
-                            'price' => $product['price'],
-                            'image_url' => $product['image_url']
-                        ];
+                    // If user is logged in, also update session cart for immediate display
+                    if (isset($_SESSION['user_id'])) {
+                        $_SESSION['cart'] = $this->cartModel->toSessionFormat($_SESSION['user_id']);
                     }
                 }
             }
@@ -91,7 +127,7 @@ class MarketplaceController extends Controller {
     }
     
     public function cart() {
-        $cart = $_SESSION['cart'] ?? [];
+        $cart = $this->getCart();
         $total = 0;
         
         foreach ($cart as $item) {
@@ -108,9 +144,17 @@ class MarketplaceController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $index = intval($_POST['index'] ?? -1);
             
-            if ($index >= 0 && isset($_SESSION['cart'][$index])) {
-                unset($_SESSION['cart'][$index]);
-                $_SESSION['cart'] = array_values($_SESSION['cart']); // Reindex
+            if (isset($_SESSION['user_id'])) {
+                // User is logged in - remove from database
+                $this->cartModel->removeItemByIndex($_SESSION['user_id'], $index);
+                // Update session cart for immediate display
+                $_SESSION['cart'] = $this->cartModel->toSessionFormat($_SESSION['user_id']);
+            } else {
+                // User not logged in - remove from session
+                if ($index >= 0 && isset($_SESSION['cart'][$index])) {
+                    unset($_SESSION['cart'][$index]);
+                    $_SESSION['cart'] = array_values($_SESSION['cart']); // Reindex
+                }
             }
         }
         
@@ -120,8 +164,9 @@ class MarketplaceController extends Controller {
     public function checkout() {
         $this->requireAuth();
         
+        $cart = $this->getCart();
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $cart = $_SESSION['cart'] ?? [];
             $shippingAddress = $_POST['shipping_address'] ?? '';
             
             if (empty($cart)) {
@@ -159,8 +204,9 @@ class MarketplaceController extends Controller {
                     }
                 }
                 
-                // Clear cart
-                $_SESSION['cart'] = [];
+                // Clear cart from database
+                $this->cartModel->clearCart($_SESSION['user_id']);
+                $_SESSION['cart'] = []; // Also clear session cart
                 
                 $this->redirect('/?controller=marketplace&action=orderSuccess&id=' . $orderId);
             } catch (Exception $e) {
@@ -168,7 +214,6 @@ class MarketplaceController extends Controller {
                 $this->view('marketplace/cart', ['cart' => $cart, 'error' => $error]);
             }
         } else {
-            $cart = $_SESSION['cart'] ?? [];
             if (empty($cart)) {
                 $this->redirect('/?controller=marketplace&action=cart');
                 return;
@@ -203,6 +248,46 @@ class MarketplaceController extends Controller {
         $orders = $this->orderModel->findByUserId($_SESSION['user_id']);
         
         $this->view('marketplace/orders', ['orders' => $orders]);
+    }
+    
+    /**
+     * Get cart count via AJAX
+     */
+    public function getCartCount() {
+        $cartCount = 0;
+        
+        if (isset($_SESSION['user_id'])) {
+            // User is logged in - get from database
+            try {
+                $cartCount = $this->cartModel->getCartCount($_SESSION['user_id']);
+                // Update session for consistency
+                if ($cartCount > 0) {
+                    $_SESSION['cart'] = $this->cartModel->toSessionFormat($_SESSION['user_id']);
+                } else {
+                    $_SESSION['cart'] = [];
+                }
+            } catch (Exception $e) {
+                // Fallback to session
+                if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+                    foreach ($_SESSION['cart'] as $item) {
+                        if (isset($item['quantity']) && is_numeric($item['quantity'])) {
+                            $cartCount += intval($item['quantity']);
+                        }
+                    }
+                }
+            }
+        } else {
+            // User not logged in - get from session
+            if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+                foreach ($_SESSION['cart'] as $item) {
+                    if (isset($item['quantity']) && is_numeric($item['quantity'])) {
+                        $cartCount += intval($item['quantity']);
+                    }
+                }
+            }
+        }
+        
+        $this->json(['count' => $cartCount]);
     }
 }
 

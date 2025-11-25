@@ -35,14 +35,19 @@ $pageTitle = 'Communauté';
                     </div>
                     
                     <div class="post-actions">
-                        <form method="POST" action="<?php echo BASE_URL; ?>/?controller=social&action=like" style="display: inline;">
+                        <form method="POST" action="<?php echo BASE_URL; ?>/?controller=social&action=like" style="display: inline-block; margin-right: 0.5rem;">
                             <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
                             <input type="hidden" name="redirect" value="<?php echo BASE_URL; ?>/?controller=social&action=index">
                             <button type="submit" class="btn-like <?php echo ($post['is_liked'] ?? false) ? 'liked' : ''; ?>">
-                                ❤️ <?php echo $post['like_count'] ?? 0; ?>
+                                <?php echo ($post['is_liked'] ?? false) ? '❤️' : '🤍'; ?> <?php echo $post['like_count'] ?? 0; ?>
                             </button>
                         </form>
-                        <a href="<?php echo BASE_URL; ?>/?controller=social&action=detail&id=<?php echo $post['id']; ?>" class="btn btn-secondary">Commenter</a>
+                        <a href="<?php echo BASE_URL; ?>/?controller=social&action=detail&id=<?php echo $post['id']; ?>#comments-section" 
+                           class="btn btn-secondary" 
+                           style="display: inline-block; text-decoration: none;"
+                           onclick="window.location.href=this.href; return true;">
+                            💬 Commenter
+                        </a>
                     </div>
                     
                     <div class="post-stats">

@@ -90,6 +90,9 @@ class SocialController extends Controller {
     public function like() {
         $this->requireAuth();
         
+        // Check if this is an AJAX request
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $postId = intval($_POST['post_id'] ?? 0);
             
@@ -97,6 +100,7 @@ class SocialController extends Controller {
                 $post = $this->postModel->findById($postId);
                 if ($post) {
                     $liked = $this->postModel->toggleLike($postId, $_SESSION['user_id']);
+                    $likeCount = $this->postModel->getLikeCount($postId);
                     
                     // Create notification if liked
                     if ($liked && $post['user_id'] != $_SESSION['user_id']) {
@@ -107,40 +111,65 @@ class SocialController extends Controller {
                             '/?controller=social&action=detail&id=' . $postId
                         );
                     }
+                    
+                    // Return JSON for AJAX requests
+                    if ($isAjax) {
+                        $this->json([
+                            'success' => true,
+                            'liked' => $liked,
+                            'likeCount' => $likeCount
+                        ]);
+                        return;
+                    }
                 }
             }
         }
         
+        // Fallback to redirect for non-AJAX requests
         $redirect = $_POST['redirect'] ?? '/?controller=social&action=index';
+        // Remove BASE_URL if it's already in the redirect
+        if (strpos($redirect, BASE_URL) === 0) {
+            $redirect = str_replace(BASE_URL, '', $redirect);
+        }
         $this->redirect($redirect);
     }
     
     public function comment() {
         $this->requireAuth();
         
+        $postId = intval($_POST['post_id'] ?? $_GET['id'] ?? 0);
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $postId = intval($_POST['post_id'] ?? 0);
-            $contentText = $_POST['content'] ?? '';
+            $contentText = trim($_POST['content'] ?? '');
             
             if ($postId && !empty($contentText)) {
                 $post = $this->postModel->findById($postId);
                 if ($post) {
-                    $this->commentModel->create($postId, $_SESSION['user_id'], $contentText);
-                    
-                    // Create notification
-                    if ($post['user_id'] != $_SESSION['user_id']) {
-                        $this->notificationModel->create(
-                            $post['user_id'],
-                            NOTIF_POST_COMMENTED,
-                            $_SESSION['user_username'] . ' commented on your post',
-                            '/?controller=social&action=detail&id=' . $postId
-                        );
+                    if ($this->commentModel->create($postId, $_SESSION['user_id'], $contentText)) {
+                        // Create notification
+                        if ($post['user_id'] != $_SESSION['user_id']) {
+                            $this->notificationModel->create(
+                                $post['user_id'],
+                                NOTIF_POST_COMMENTED,
+                                $_SESSION['user_username'] . ' commented on your post',
+                                '/?controller=social&action=detail&id=' . $postId
+                            );
+                        }
                     }
                 }
             }
+            
+            // Always redirect back to the post detail page
+            if ($postId) {
+                $this->redirect('/?controller=social&action=detail&id=' . $postId);
+            } else {
+                $this->redirect('/?controller=social&action=index');
+            }
+            return;
         }
         
-        $this->redirect('/?controller=social&action=detail&id=' . $postId);
+        // If not POST, redirect to index
+        $this->redirect('/?controller=social&action=index');
     }
     
     public function profile() {

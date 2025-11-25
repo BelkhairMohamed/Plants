@@ -5,6 +5,16 @@
 
 class Controller {
     protected function view($viewName, $data = []) {
+        // Sync session cart with database if user is logged in
+        if (isset($_SESSION['user_id']) && class_exists('Cart')) {
+            try {
+                $cartModel = new Cart();
+                $_SESSION['cart'] = $cartModel->toSessionFormat($_SESSION['user_id']);
+            } catch (Exception $e) {
+                // Silently fail if cart table doesn't exist
+            }
+        }
+        
         extract($data);
         require_once VIEWS_PATH . '/layouts/header.php';
         require_once VIEWS_PATH . '/' . $viewName . '.php';

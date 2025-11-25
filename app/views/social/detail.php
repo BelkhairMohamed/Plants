@@ -3,7 +3,7 @@ $pageTitle = 'Post';
 ?>
 
 <div class="container">
-    <div class="post-detail-page">
+    <div class="post-detail-page" id="post-detail">
         <div class="post-card">
             <div class="post-header">
                 <img src="<?php echo htmlspecialchars($post['avatar_url'] ?? 'https://via.placeholder.com/40'); ?>" alt="" class="avatar">
@@ -36,13 +36,13 @@ $pageTitle = 'Post';
                     <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
                     <input type="hidden" name="redirect" value="<?php echo BASE_URL; ?>/?controller=social&action=detail&id=<?php echo $post['id']; ?>">
                     <button type="submit" class="btn-like <?php echo $isLiked ? 'liked' : ''; ?>">
-                        ❤️ <?php echo $likeCount; ?>
+                        <?php echo $isLiked ? '❤️' : '🤍'; ?> <?php echo $likeCount; ?>
                     </button>
                 </form>
             </div>
         </div>
         
-        <div class="comments-section">
+        <div class="comments-section" id="comments-section">
             <h2>Commentaires</h2>
             
             <?php if (isset($_SESSION['user_id'])): ?>
@@ -74,6 +74,30 @@ $pageTitle = 'Post';
         </div>
     </div>
 </div>
+
+<script>
+// Scroll to comments section if hash is present
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#comments-section') {
+        setTimeout(function() {
+            const commentsSection = document.getElementById('comments-section');
+            if (commentsSection) {
+                commentsSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                // Focus on textarea if user is logged in
+                const textarea = document.querySelector('#comments-section textarea');
+                if (textarea) {
+                    setTimeout(function() {
+                        textarea.focus();
+                    }, 500);
+                }
+            }
+        }, 100);
+    }
+});
+</script>
 
 
 

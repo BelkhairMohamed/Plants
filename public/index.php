@@ -12,6 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/autoload.php';
+require_once __DIR__ . '/../app/helpers/cart_helper.php';
 
 // Simple routing
 $controller = $_GET['controller'] ?? 'home';

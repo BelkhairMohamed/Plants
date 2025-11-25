@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'Plants Management'; ?></title>
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/assets/css/style.css">
+    <script>
+        // Define BASE_URL for JavaScript
+        const BASE_URL = '<?php echo BASE_URL; ?>';
+        
+        // Dark Mode - Load immediately to prevent flash
+        (function() {
+            const html = document.documentElement;
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            }
+        })();
+        
+        // Initialize dark mode switch state immediately when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('dark-mode-switch');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (darkModeToggle) {
+                darkModeToggle.checked = (currentTheme === 'dark');
+            }
+        });
+    </script>
 </head>
 <body>
     <nav class="navbar">
@@ -16,8 +38,25 @@
                 <span></span>
             </button>
             <ul class="nav-menu">
+                <li>
+                    <label class="dark-mode-toggle" aria-label="Toggle dark mode">
+                        <input type="checkbox" id="dark-mode-switch">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </li>
                 <li><a href="<?php echo BASE_URL; ?>/">Accueil</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index">Catalogue</a></li>
+                <li>
+                    <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=cart" class="cart-link" title="Panier" id="cart-link">
+                        🛒
+                        <?php
+                        // Use helper function to get cart count
+                        $cartCount = getCartCount();
+                        // Always render badge container, but hide if count is 0
+                        echo "<span class='badge cart-badge' id='cart-badge' style='display: " . ($cartCount > 0 ? 'inline-block' : 'none') . ";'>$cartCount</span>";
+                        ?>
+                    </a>
+                </li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index">Tableau de bord</a></li>
                     <li><a href="<?php echo BASE_URL; ?>/?controller=userPlant&action=index">Mes Plantes</a></li>
