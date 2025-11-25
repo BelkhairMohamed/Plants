@@ -32,13 +32,9 @@ $pageTitle = 'Post';
             <?php endif; ?>
             
             <div class="post-actions">
-                <form method="POST" action="<?php echo BASE_URL; ?>/?controller=social&action=like" style="display: inline;">
-                    <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
-                    <input type="hidden" name="redirect" value="<?php echo BASE_URL; ?>/?controller=social&action=detail&id=<?php echo $post['id']; ?>">
-                    <button type="submit" class="btn-like <?php echo $isLiked ? 'liked' : ''; ?>">
-                        ❤️ <?php echo $likeCount; ?>
-                    </button>
-                </form>
+                <button class="like-btn <?php echo $isLiked ? 'liked' : ''; ?>" data-post-id="<?php echo $post['id']; ?>">
+                    ❤️ <span class="like-count"><?php echo $likeCount; ?></span>
+                </button>
             </div>
         </div>
         
@@ -74,6 +70,7 @@ $pageTitle = 'Post';
         </div>
     </div>
 </div>
+
 
 
 

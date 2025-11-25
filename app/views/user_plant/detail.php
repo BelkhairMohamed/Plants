@@ -114,3 +114,4 @@ $pageTitle = htmlspecialchars($plant['nickname_for_plant'] ?? $plant['common_nam
 
 
 
+

@@ -64,12 +64,18 @@ class User {
         return $stmt->execute([$hashedPassword, $id]);
     }
     
+    public function updateAvatar($id, $avatarUrl) {
+        $stmt = $this->db->prepare("UPDATE users SET avatar_url = ? WHERE id = ?");
+        return $stmt->execute([$avatarUrl, $id]);
+    }
+    
     public function getAll($limit = 100, $offset = 0) {
         $stmt = $this->db->prepare("SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?");
         $stmt->execute([$limit, $offset]);
         return $stmt->fetchAll();
     }
 }
+
 
 
 

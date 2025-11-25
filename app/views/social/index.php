@@ -35,13 +35,9 @@ $pageTitle = 'Communauté';
                     </div>
                     
                     <div class="post-actions">
-                        <form method="POST" action="<?php echo BASE_URL; ?>/?controller=social&action=like" style="display: inline;">
-                            <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
-                            <input type="hidden" name="redirect" value="<?php echo BASE_URL; ?>/?controller=social&action=index">
-                            <button type="submit" class="btn-like <?php echo ($post['is_liked'] ?? false) ? 'liked' : ''; ?>">
-                                ❤️ <?php echo $post['like_count'] ?? 0; ?>
-                            </button>
-                        </form>
+                        <button class="like-btn <?php echo ($post['is_liked'] ?? false) ? 'liked' : ''; ?>" data-post-id="<?php echo $post['id']; ?>">
+                            ❤️ <span class="like-count"><?php echo $post['like_count'] ?? 0; ?></span>
+                        </button>
                         <a href="<?php echo BASE_URL; ?>/?controller=social&action=detail&id=<?php echo $post['id']; ?>" class="btn btn-secondary">Commenter</a>
                     </div>
                     
@@ -53,6 +49,7 @@ $pageTitle = 'Communauté';
         <?php endif; ?>
     </div>
 </div>
+
 
 
 

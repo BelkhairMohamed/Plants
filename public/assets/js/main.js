@@ -108,4 +108,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// AJAX Like Button Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const likeButtons = document.querySelectorAll('.like-btn');
+    
+    likeButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const postId = this.dataset.postId;
+            if (!postId) return;
+            
+            const likeCount = this.querySelector('.like-count');
+            const button = this;
+            
+            fetch('/?controller=social&action=like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: 'post_id=' + postId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.classList.toggle('active');
+                    if (data.liked) {
+                        button.classList.add('liked');
+                    } else {
+                        button.classList.remove('liked');
+                    }
+                    if (likeCount) {
+                        likeCount.textContent = data.like_count;
+                    }
+                }
+            })
+            .catch(error => console.error('Like error:', error));
+        });
+    });
+});
+
+
 
