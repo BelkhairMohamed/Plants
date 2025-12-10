@@ -1,0 +1,33 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Uploads (if you add file upload later)
+public/uploads/
+public/assets/img/uploads/
+
+# Temporary files
+tmp/
+temp/
+
+# Composer (if you add it later)
+vendor/
+composer.lock
+
+
+
