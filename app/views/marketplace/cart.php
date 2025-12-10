@@ -15,7 +15,15 @@ $pageTitle = 'Panier';
     <?php if (empty($cart)): ?>
         <div class="empty-state">
             <p>Votre panier est vide.</p>
-            <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="btn btn-primary">Continuer les achats</a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="btn btn-primary">Continuer les achats</a>
+            <?php else: ?>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=login" class="btn btn-primary">Se connecter</a>
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=register" class="btn btn-secondary">S'inscrire</a>
+                </div>
+                <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">Connectez-vous pour sauvegarder votre panier et passer commande</p>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <form method="POST" action="<?php echo BASE_URL; ?>/?controller=marketplace&action=updateCart" id="cart-form">
@@ -81,11 +89,15 @@ $pageTitle = 'Panier';
         </form>
         
         <div class="cart-actions">
-            <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="btn btn-secondary">Continuer les achats</a>
             <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="btn btn-secondary">Continuer les achats</a>
                 <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=checkout" class="btn btn-primary">Passer la commande</a>
             <?php else: ?>
-                <a href="<?php echo BASE_URL; ?>/?controller=auth&action=login" class="btn btn-primary">Connectez-vous pour commander</a>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; width: 100%;">
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=login" class="btn btn-primary">Se connecter</a>
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=register" class="btn btn-secondary">S'inscrire</a>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem; width: 100%;">Connectez-vous ou créez un compte pour passer commande et sauvegarder votre panier</p>
             <?php endif; ?>
         </div>
     <?php endif; ?>
