@@ -7,11 +7,13 @@ class SocialController extends Controller {
     private $postModel;
     private $commentModel;
     private $notificationModel;
+    private $followModel;
     
     public function __construct() {
         $this->postModel = new Post();
         $this->commentModel = new Comment();
         $this->notificationModel = new Notification();
+        $this->followModel = new Follow();
     }
     
     public function index() {
@@ -19,7 +21,20 @@ class SocialController extends Controller {
         $limit = 20;
         $offset = ($page - 1) * $limit;
         
-        $posts = $this->postModel->getAll($limit, $offset);
+        // If user is logged in, show posts from followed users, otherwise random
+        if (isset($_SESSION['user_id'])) {
+            $followedPosts = $this->postModel->getPostsFromFollowing($_SESSION['user_id'], $limit, $offset);
+            
+            // If no posts from followed users, show random posts
+            if (empty($followedPosts)) {
+                $posts = $this->postModel->getRandomPosts($limit, $offset);
+            } else {
+                $posts = $followedPosts;
+            }
+        } else {
+            // For non-logged-in users, show random posts
+            $posts = $this->postModel->getRandomPosts($limit, $offset);
+        }
         
         // Check which posts are liked by current user
         if (isset($_SESSION['user_id'])) {
@@ -194,12 +209,115 @@ class SocialController extends Controller {
         
         $posts = $this->postModel->findByUserId($userId);
         
+        // Get follow statistics
+        $followersCount = $this->followModel->getFollowersCount($userId);
+        $followingCount = $this->followModel->getFollowingCount($userId);
+        $postsCount = $this->postModel->getPostsCount($userId);
+        
+        // Check if current user is following this user
+        $isFollowing = false;
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $userId) {
+            $isFollowing = $this->followModel->isFollowing($_SESSION['user_id'], $userId);
+        }
+        
+        $isOwnProfile = isset($_SESSION['user_id']) && $userId == $_SESSION['user_id'];
+        
         $this->view('social/profile', [
             'user' => $user,
             'userPlants' => $userPlants,
             'posts' => $posts,
-            'isOwnProfile' => isset($_SESSION['user_id']) && $userId == $_SESSION['user_id']
+            'isOwnProfile' => $isOwnProfile,
+            'followersCount' => $followersCount,
+            'followingCount' => $followingCount,
+            'postsCount' => $postsCount,
+            'isFollowing' => $isFollowing
         ]);
+    }
+    
+    public function follow() {
+        $this->requireAuth();
+        
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $followingId = intval($_POST['user_id'] ?? 0);
+            $followerId = $_SESSION['user_id'];
+            
+            if ($followingId && $followingId != $followerId) {
+                $wasFollowing = $this->followModel->isFollowing($followerId, $followingId);
+                $this->followModel->toggleFollow($followerId, $followingId);
+                $isFollowing = $this->followModel->isFollowing($followerId, $followingId);
+                
+                $followersCount = $this->followModel->getFollowersCount($followingId);
+                
+                // Create notification if started following
+                if ($isFollowing && !$wasFollowing) {
+                    $userModel = new User();
+                    $follower = $userModel->findById($followerId);
+                    $this->notificationModel->create(
+                        $followingId,
+                        'follow',
+                        $follower['username'] . ' started following you',
+                        '/?controller=social&action=profile&user_id=' . $followerId
+                    );
+                }
+                
+                if ($isAjax) {
+                    $this->json([
+                        'success' => true,
+                        'isFollowing' => $isFollowing,
+                        'followersCount' => $followersCount
+                    ]);
+                    return;
+                }
+            }
+        }
+        
+        $redirect = $_POST['redirect'] ?? '/?controller=social&action=index';
+        if (strpos($redirect, BASE_URL) === 0) {
+            $redirect = str_replace(BASE_URL, '', $redirect);
+        }
+        $this->redirect($redirect);
+    }
+    
+    public function searchUsers() {
+        $this->requireAuth();
+        
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $isAjax) {
+            $query = trim($_GET['q'] ?? '');
+            
+            if (strlen($query) < 2) {
+                $this->json(['success' => true, 'users' => []]);
+                return;
+            }
+            
+            $userModel = new User();
+            $users = $userModel->searchByUsername($query, 20, $_SESSION['user_id']);
+            
+            // Get follow status for each user
+            $results = [];
+            foreach ($users as $user) {
+                $isFollowing = $this->followModel->isFollowing($_SESSION['user_id'], $user['id']);
+                $followersCount = $this->followModel->getFollowersCount($user['id']);
+                
+                $results[] = [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                    'avatar_url' => $user['avatar_url'] ?? 'https://via.placeholder.com/150',
+                    'bio' => $user['bio'] ?? '',
+                    'isFollowing' => $isFollowing,
+                    'followersCount' => $followersCount
+                ];
+            }
+            
+            $this->json(['success' => true, 'users' => $results]);
+            return;
+        }
+        
+        // If not AJAX, redirect
+        $this->redirect('/?controller=social&action=index');
     }
 }
 

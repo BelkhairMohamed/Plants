@@ -19,9 +19,13 @@ $pageTitle = 'Communauté';
             <?php foreach ($posts as $post): ?>
                 <div class="post-card">
                     <div class="post-header">
-                        <img src="<?php echo htmlspecialchars($post['avatar_url'] ?? 'https://via.placeholder.com/40'); ?>" alt="" class="avatar">
+                        <a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $post['user_id']; ?>" class="post-user-link">
+                            <img src="<?php echo htmlspecialchars($post['avatar_url'] ?? 'https://via.placeholder.com/40'); ?>" alt="" class="avatar">
+                        </a>
                         <div>
-                            <strong><?php echo htmlspecialchars($post['username']); ?></strong>
+                            <a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $post['user_id']; ?>" class="post-username-link">
+                                <strong><?php echo htmlspecialchars($post['username']); ?></strong>
+                            </a>
                             <span class="post-date"><?php echo date('d/m/Y H:i', strtotime($post['created_at'])); ?></span>
                         </div>
                     </div>

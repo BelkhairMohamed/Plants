@@ -31,69 +31,111 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="<?php echo BASE_URL; ?>/" class="logo">
-                <i class="fas fa-leaf"></i> Plants
-            </a>
-            <button class="hamburger" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="nav-menu">
-                <li>
-                    <label class="dark-mode-toggle" aria-label="Toggle dark mode">
-                        <input type="checkbox" id="dark-mode-switch">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </li>
-                <li><a href="<?php echo BASE_URL; ?>/">Accueil</a></li>
-                <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index">Catalogue</a></li>
-                <li>
-                    <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=cart" class="cart-link" title="Panier" id="cart-link">
+        <div class="navbar-main">
+            <div class="navbar-left">
+                <a href="<?php echo BASE_URL; ?>/" class="logo">
+                    <i class="fas fa-leaf"></i> Plants
+                </a>
+            </div>
+            <div class="navbar-right">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <?php
+                    // Get user avatar
+                    $userModel = new User();
+                    $currentUser = $userModel->findById($_SESSION['user_id']);
+                    $userAvatar = $currentUser['avatar_url'] ?? 'https://via.placeholder.com/150';
+                    ?>
+                    <button class="search-toggle-btn" id="search-toggle-btn" title="Rechercher des utilisateurs">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=cart" class="navbar-icon-link cart-link" title="Panier" id="cart-link">
                         <i class="fas fa-shopping-cart"></i>
                         <?php
-                        // Use helper function to get cart count
                         $cartCount = getCartCount();
-                        // Always render badge container, but hide if count is 0
                         echo "<span class='badge cart-badge' id='cart-badge' style='display: " . ($cartCount > 0 ? 'inline-flex' : 'none') . ";'>$cartCount</span>";
                         ?>
                     </a>
-                </li>
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index">Tableau de bord</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=userPlant&action=index">Mes Plantes</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=social&action=index">Communauté</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index">Boutique</a></li>
-                    <li>
-                        <a href="<?php echo BASE_URL; ?>/?controller=notification&action=index" class="notification-link" title="Notifications">
-                            <i class="fas fa-bell"></i>
-                            <?php
-                            $notificationCount = 0;
-                            if (isset($_SESSION['user_id']) && class_exists('Notification')) {
-                                try {
-                                    $notificationModel = new Notification();
-                                    $notificationCount = $notificationModel->getUnreadCount($_SESSION['user_id']);
-                                } catch (Exception $e) {
-                                    // Silently fail if notification system not available
-                                }
+                    <a href="<?php echo BASE_URL; ?>/?controller=notification&action=index" class="navbar-icon-link notification-link" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <?php
+                        $notificationCount = 0;
+                        if (isset($_SESSION['user_id']) && class_exists('Notification')) {
+                            try {
+                                $notificationModel = new Notification();
+                                $notificationCount = $notificationModel->getUnreadCount($_SESSION['user_id']);
+                            } catch (Exception $e) {
+                                // Silently fail if notification system not available
                             }
-                            // Always render badge container, but hide if count is 0
-                            echo "<span class='badge notification-badge' id='notification-badge' style='display: " . ($notificationCount > 0 ? 'inline-block' : 'none') . ";'>$notificationCount</span>";
-                            ?>
-                        </a>
-                    </li>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $_SESSION['user_id']; ?>"><?php echo htmlspecialchars($_SESSION['user_username']); ?></a></li>
-                    <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                        <li><a href="<?php echo BASE_URL; ?>/?controller=admin&action=plants">Admin</a></li>
-                    <?php endif; ?>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=auth&action=logout">Déconnexion</a></li>
+                        }
+                        echo "<span class='badge notification-badge' id='notification-badge' style='display: " . ($notificationCount > 0 ? 'inline-block' : 'none') . ";'>$notificationCount</span>";
+                        ?>
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $_SESSION['user_id']; ?>" class="navbar-profile-link" title="Profil">
+                        <img src="<?php echo htmlspecialchars($userAvatar); ?>" alt="<?php echo htmlspecialchars($_SESSION['user_username']); ?>" class="navbar-profile-avatar">
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=logout" class="navbar-logout-btn" title="Déconnexion">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                 <?php else: ?>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=auth&action=login">Connexion</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>/?controller=auth&action=register">Inscription</a></li>
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=login" class="navbar-login-btn">Connexion</a>
+                    <a href="<?php echo BASE_URL; ?>/?controller=auth&action=register" class="navbar-register-btn">Inscription</a>
                 <?php endif; ?>
-            </ul>
+            </div>
         </div>
+        
+        <?php if (isset($_SESSION['user_id'])): ?>
+        <div class="navbar-sub">
+            <div class="navbar-sub-container">
+                <a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index" class="navbar-sub-link">Catalogue</a>
+                <a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index" class="navbar-sub-link">Tableau de bord</a>
+                <a href="<?php echo BASE_URL; ?>/?controller=social&action=index" class="navbar-sub-link">Communauté</a>
+                <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="navbar-sub-link">Boutique</a>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                    <a href="<?php echo BASE_URL; ?>/?controller=admin&action=plants" class="navbar-sub-link">Admin</a>
+                <?php endif; ?>
+                <div class="navbar-sub-spacer"></div>
+                <label class="dark-mode-toggle" aria-label="Toggle dark mode">
+                    <input type="checkbox" id="dark-mode-switch">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <?php endif; ?>
     </nav>
+    
+    <!-- User Search Sidebar -->
+    <div class="search-sidebar" id="search-sidebar">
+        <div class="search-sidebar-header">
+            <h2><i class="fas fa-search"></i> Rechercher des utilisateurs</h2>
+            <button class="search-sidebar-close" id="search-sidebar-close" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="search-sidebar-content">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    id="user-search-input" 
+                    class="user-search-input" 
+                    placeholder="Tapez un nom d'utilisateur..."
+                    autocomplete="off"
+                >
+                <button class="search-clear-btn" id="search-clear-btn" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="search-results" id="search-results">
+                <div class="search-placeholder">
+                    <i class="fas fa-user-friends"></i>
+                    <p>Tapez au moins 2 caractères pour rechercher</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Overlay for sidebar -->
+    <div class="search-sidebar-overlay" id="search-sidebar-overlay"></div>
+    
     <main class="main-content">
 

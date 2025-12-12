@@ -102,6 +102,16 @@ class MarketplaceController extends Controller {
             return;
         }
         
+        // Get product images
+        $images = $this->productModel->getImages($id);
+        
+        // If no images in product_images table, use image_url as fallback
+        if (empty($images) && !empty($product['image_url'])) {
+            $images = [$product['image_url']];
+        }
+        
+        $product['images'] = $images;
+        
         $this->view('marketplace/detail', ['product' => $product]);
     }
     

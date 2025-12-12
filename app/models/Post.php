@@ -102,6 +102,57 @@ class Post {
         $result = $stmt->fetch();
         return $result['count'] ?? 0;
     }
+    
+    /**
+     * Get posts from users that the current user is following
+     */
+    public function getPostsFromFollowing($userId, $limit = 20, $offset = 0) {
+        $stmt = $this->db->prepare("
+            SELECT p.*, u.username, u.avatar_url,
+                   COUNT(DISTINCT pl.id) as like_count,
+                   COUNT(DISTINCT c.id) as comment_count
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            JOIN follows f ON p.user_id = f.following_id AND f.follower_id = ?
+            LEFT JOIN post_likes pl ON p.id = pl.post_id
+            LEFT JOIN comments c ON p.id = c.post_id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->execute([$userId, $limit, $offset]);
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Get random posts (for users not following anyone or when no followed posts)
+     */
+    public function getRandomPosts($limit = 20, $offset = 0) {
+        $stmt = $this->db->prepare("
+            SELECT p.*, u.username, u.avatar_url,
+                   COUNT(DISTINCT pl.id) as like_count,
+                   COUNT(DISTINCT c.id) as comment_count
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            LEFT JOIN post_likes pl ON p.id = pl.post_id
+            LEFT JOIN comments c ON p.id = c.post_id
+            GROUP BY p.id
+            ORDER BY RAND()
+            LIMIT ? OFFSET ?
+        ");
+        $stmt->execute([$limit, $offset]);
+        return $stmt->fetchAll();
+    }
+    
+    /**
+     * Get posts count for a user
+     */
+    public function getPostsCount($userId) {
+        $stmt = $this->db->prepare("SELECT COUNT(*) as count FROM posts WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $result = $stmt->fetch();
+        return intval($result['count'] ?? 0);
+    }
 }
 
 

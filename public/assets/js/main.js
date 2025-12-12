@@ -390,4 +390,263 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(refreshCartCount, 5000);
 });
 
+// User Search Sidebar Functionality
+(function() {
+    let searchTimeout;
+    let currentSearchQuery = '';
+    
+    function initUserSearch() {
+        const searchToggleBtn = document.getElementById('search-toggle-btn');
+        const searchSidebar = document.getElementById('search-sidebar');
+        const searchSidebarClose = document.getElementById('search-sidebar-close');
+        const searchSidebarOverlay = document.getElementById('search-sidebar-overlay');
+        const searchInput = document.getElementById('user-search-input');
+        const searchClearBtn = document.getElementById('search-clear-btn');
+        const searchResults = document.getElementById('search-results');
+        
+        if (!searchToggleBtn || !searchSidebar) {
+            return; // Search feature not available (user not logged in)
+        }
+        
+        // Toggle sidebar
+        function openSidebar() {
+            searchSidebar.classList.add('active');
+            searchSidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Focus search input after animation
+            setTimeout(() => {
+                if (searchInput) searchInput.focus();
+            }, 300);
+        }
+        
+        function closeSidebar() {
+            searchSidebar.classList.remove('active');
+            searchSidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearchQuery = '';
+            }
+            showPlaceholder();
+        }
+        
+        // Event listeners
+        searchToggleBtn.addEventListener('click', openSidebar);
+        searchSidebarClose.addEventListener('click', closeSidebar);
+        searchSidebarOverlay.addEventListener('click', closeSidebar);
+        
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchSidebar.classList.contains('active')) {
+                closeSidebar();
+            }
+        });
+        
+        // Search input handling
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                
+                // Show/hide clear button
+                if (searchClearBtn) {
+                    searchClearBtn.style.display = query ? 'flex' : 'none';
+                }
+                
+                // Clear previous timeout
+                clearTimeout(searchTimeout);
+                
+                // If query is too short, show placeholder
+                if (query.length < 2) {
+                    currentSearchQuery = '';
+                    showPlaceholder();
+                    return;
+                }
+                
+                // Debounce search
+                searchTimeout = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+            
+            // Clear button
+            if (searchClearBtn) {
+                searchClearBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    currentSearchQuery = '';
+                    searchClearBtn.style.display = 'none';
+                    showPlaceholder();
+                    searchInput.focus();
+                });
+            }
+        }
+        
+        // Perform search
+        function performSearch(query) {
+            if (query === currentSearchQuery) return;
+            currentSearchQuery = query;
+            
+            // Show loading
+            searchResults.innerHTML = `
+                <div class="search-loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Recherche en cours...</p>
+                </div>
+            `;
+            
+            // Make AJAX request
+            if (typeof BASE_URL === 'undefined') {
+                console.error('BASE_URL not defined');
+                return;
+            }
+            
+            fetch(`${BASE_URL}/?controller=social&action=searchUsers&q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.users) {
+                    displaySearchResults(data.users);
+                } else {
+                    showNoResults();
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                searchResults.innerHTML = `
+                    <div class="search-no-results">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erreur lors de la recherche</p>
+                    </div>
+                `;
+            });
+        }
+        
+        // Display search results
+        function displaySearchResults(users) {
+            if (users.length === 0) {
+                showNoResults();
+                return;
+            }
+            
+            const resultsHTML = users.map(user => {
+                const avatarUrl = user.avatar_url || 'https://via.placeholder.com/150';
+                const bio = user.bio ? `<p class="search-result-bio">${escapeHtml(user.bio)}</p>` : '';
+                const followBtnClass = user.isFollowing ? 'unfollow' : 'follow';
+                const followBtnText = user.isFollowing ? 'Ne plus suivre' : 'Suivre';
+                
+                return `
+                    <div class="search-result-item" onclick="window.location.href='${BASE_URL}/?controller=social&action=profile&user_id=${user.id}'">
+                        <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(user.username)}" class="search-result-avatar">
+                        <div class="search-result-info">
+                            <h3 class="search-result-username">${escapeHtml(user.username)}</h3>
+                            ${bio}
+                        </div>
+                        <div class="search-result-actions" onclick="event.stopPropagation();">
+                            <button class="search-follow-btn ${followBtnClass}" 
+                                    data-user-id="${user.id}" 
+                                    data-is-following="${user.isFollowing ? '1' : '0'}">
+                                ${followBtnText}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            searchResults.innerHTML = resultsHTML;
+            
+            // Attach follow button handlers
+            attachFollowHandlers();
+        }
+        
+        // Show placeholder
+        function showPlaceholder() {
+            searchResults.innerHTML = `
+                <div class="search-placeholder">
+                    <i class="fas fa-user-friends"></i>
+                    <p>Tapez au moins 2 caractères pour rechercher</p>
+                </div>
+            `;
+        }
+        
+        // Show no results
+        function showNoResults() {
+            searchResults.innerHTML = `
+                <div class="search-no-results">
+                    <i class="fas fa-search"></i>
+                    <p>Aucun utilisateur trouvé</p>
+                </div>
+            `;
+        }
+        
+        // Attach follow button handlers
+        function attachFollowHandlers() {
+            const followButtons = searchResults.querySelectorAll('.search-follow-btn');
+            followButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const userId = parseInt(this.getAttribute('data-user-id'));
+                    const isFollowing = this.getAttribute('data-is-following') === '1';
+                    
+                    if (!userId) return;
+                    
+                    // Disable button during request
+                    const originalText = this.textContent;
+                    this.disabled = true;
+                    this.textContent = '...';
+                    
+                    // Make follow/unfollow request
+                    const formData = new FormData();
+                    formData.append('user_id', userId);
+                    formData.append('redirect', window.location.href);
+                    
+                    fetch(`${BASE_URL}/?controller=social&action=follow`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update button state
+                            const newIsFollowing = data.isFollowing;
+                            this.setAttribute('data-is-following', newIsFollowing ? '1' : '0');
+                            this.className = `search-follow-btn ${newIsFollowing ? 'unfollow' : 'follow'}`;
+                            this.textContent = newIsFollowing ? 'Ne plus suivre' : 'Suivre';
+                            
+                            // Update followers count if displayed
+                            // Could update a counter if we show it in search results
+                        }
+                        this.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Follow error:', error);
+                        this.disabled = false;
+                        this.textContent = originalText;
+                    });
+                });
+            });
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUserSearch);
+    } else {
+        initUserSearch();
+    }
+})();
+
 

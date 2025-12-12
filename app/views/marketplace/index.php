@@ -26,7 +26,14 @@ $pageTitle = 'Boutique';
     <div class="product-grid">
         <?php foreach ($products as $product): ?>
             <div class="product-card">
-                <img src="<?php echo htmlspecialchars($product['image_url'] ?? 'https://via.placeholder.com/300'); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                <div class="product-image-wrapper">
+                    <img src="<?php echo htmlspecialchars($product['image_url'] ?? 'https://via.placeholder.com/300'); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                    <?php if (isset($product['image_count']) && $product['image_count'] > 1): ?>
+                        <span class="product-multi-image-badge" title="<?php echo $product['image_count']; ?> images">
+                            <i class="fas fa-images"></i> <?php echo $product['image_count']; ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
                 <h3><?php echo htmlspecialchars($product['name']); ?></h3>
                 <p class="product-category"><?php echo htmlspecialchars($product['category']); ?></p>
                 <p class="product-price"><?php echo number_format($product['price'], 2); ?> €</p>

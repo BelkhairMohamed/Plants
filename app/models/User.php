@@ -69,6 +69,30 @@ class User {
         $stmt->execute([$limit, $offset]);
         return $stmt->fetchAll();
     }
+    
+    public function searchByUsername($query, $limit = 20, $excludeUserId = null) {
+        $searchTerm = '%' . $query . '%';
+        
+        if ($excludeUserId) {
+            $stmt = $this->db->prepare("
+                SELECT * FROM users 
+                WHERE username LIKE ? AND id != ?
+                ORDER BY username ASC 
+                LIMIT ?
+            ");
+            $stmt->execute([$searchTerm, $excludeUserId, $limit]);
+        } else {
+            $stmt = $this->db->prepare("
+                SELECT * FROM users 
+                WHERE username LIKE ?
+                ORDER BY username ASC 
+                LIMIT ?
+            ");
+            $stmt->execute([$searchTerm, $limit]);
+        }
+        
+        return $stmt->fetchAll();
+    }
 }
 
 

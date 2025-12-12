@@ -34,13 +34,67 @@ class Product {
         $sql = "SELECT * FROM products $whereClause ORDER BY name LIMIT ? OFFSET ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        $products = $stmt->fetchAll();
+        
+        // Add image count to each product
+        foreach ($products as &$product) {
+            $product['image_count'] = count($this->getImages($product['id']));
+        }
+        
+        return $products;
     }
     
     public function findById($id) {
         $stmt = $this->db->prepare("SELECT * FROM products WHERE id = ?");
         $stmt->execute([$id]);
         return $stmt->fetch();
+    }
+    
+    public function getImages($productId) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT image_url 
+                FROM product_images 
+                WHERE product_id = ? 
+                ORDER BY display_order ASC, id ASC
+            ");
+            $stmt->execute([$productId]);
+            $images = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return $images;
+        } catch (Exception $e) {
+            // Table might not exist yet, return empty array
+            return [];
+        }
+    }
+    
+    public function addImage($productId, $imageUrl, $displayOrder = 0) {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO product_images (product_id, image_url, display_order) 
+                VALUES (?, ?, ?)
+            ");
+            return $stmt->execute([$productId, $imageUrl, $displayOrder]);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    public function deleteImage($imageId) {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM product_images WHERE id = ?");
+            return $stmt->execute([$imageId]);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    public function deleteAllImages($productId) {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM product_images WHERE product_id = ?");
+            return $stmt->execute([$productId]);
+        } catch (Exception $e) {
+            return false;
+        }
     }
     
     public function create($data) {
