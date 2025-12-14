@@ -1,0 +1,54 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+
+# Uploads (if you add file upload later)
+public/uploads/
+public/assets/img/uploads/
+
+# Temporary files
+tmp/
+temp/
+
+# Composer (if you add it later)
+vendor/
+composer.lock
+
+# Database backups and temporary SQL files
+# NOTE: Removed to allow committing all SQL files
+# *.sql.bak
+# *.sql.tmp
+# *.sql.gz
+# *.sql.zip
+# database_backup.sql
+# database_export.sql
+# dump.sql
+
+# Temporary files
+*.tmp
+*.bak
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
