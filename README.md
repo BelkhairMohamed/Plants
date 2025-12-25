@@ -13,7 +13,6 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 - [API et Endpoints](#-api-et-endpoints)
 - [Base de données](#️-base-de-données)
 - [Sécurité](#-sécurité)
-- [Améliorations récentes](#-améliorations-récentes)
 - [Contribution](#-contribution)
 
 ## ✨ Fonctionnalités
@@ -23,8 +22,8 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 - Filtres par difficulté, lumière, eau, humidité, etc.
 - Recherche par nom (commun ou scientifique)
 - Pages de détails avec guides d'entretien complets
-- Guides séparés pour graines et plantes matures
-- Images et descriptions détaillées
+- Galerie d'images avec miniatures circulaires
+- Images multiples par plante
 
 ### 2. Gestion personnelle
 - Ajouter des plantes à votre collection
@@ -38,7 +37,7 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 
 ### 3. Marketplace
 - Achat de plantes, graines, pots, terreau, engrais, accessoires
-- **Panier d'achat persistant** (sauvegardé en base de données pour utilisateurs connectés)
+- Panier d'achat persistant (sauvegardé en base de données)
 - Synchronisation automatique du panier à la connexion
 - Commandes et historique complet
 - Intégration automatique des achats dans la collection
@@ -47,7 +46,7 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 
 ### 4. Communauté sociale
 - Créer des posts avec photos
-- Liker et commenter les posts (AJAX pour une expérience fluide)
+- Liker et commenter les posts (AJAX)
 - Demander de l'aide avec type de post "help"
 - Profils utilisateurs avec avatars et bio
 - Historique des posts par utilisateur
@@ -71,10 +70,10 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 
 ### 7. Administration
 - Gestion du catalogue de plantes (CRUD complet)
+- Gestion des images multiples par plante
 - Gestion des produits marketplace
 - Modération des posts et commentaires
 - Interface d'administration dédiée
-- Gestion des utilisateurs
 
 ### 8. Tableau de bord interactif
 - **Graphiques Chart.js** :
@@ -94,13 +93,12 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
   - Badges animés pour panier et notifications
   - Mode sombre avec toggle switch
   - Menu hamburger responsive
-- **Footer redesigné** avec :
-  - Sections organisées avec icônes
-  - Liens animés au survol
-  - Design moderne avec gradients
+  - Menu flottant pour le catalogue
+- **Footer redesigné** avec sections organisées
 - **Page d'accueil** avec :
   - Vidéo d'arrière-plan en plein écran
-  - Overlay rose subtil pour mettre en valeur les fleurs
+  - Design moderne inspiré de Bloomscape et Hales
+  - Sections Best Sellers avec cartes produits élégantes
   - Animations d'apparition du contenu
   - Design responsive
 - **Mode sombre** complet avec support de tous les composants
@@ -132,14 +130,16 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
 
 1. **Cloner ou télécharger le projet**
    ```bash
-   cd C:\xampp\htdocs\JobinTech\PHP\Plants
+   cd C:\xampp\htdocs\Plants-main
    ```
 
 2. **Créer la base de données**
    - Ouvrir phpMyAdmin ou MySQL
-   - Exécuter le script `database/schema.sql` (inclut toutes les tables, y compris `cart_items`)
-   - Exécuter le script `database/seed_data.sql` pour les données d'exemple
-   - **Note**: Si vous avez une base existante sans la table `cart_items`, exécutez `database/migration_add_cart_table.sql`
+   - Exécuter le script `database/SETUP_COMPLETE.sql` qui inclut :
+     - Création de la base de données
+     - Création de toutes les tables
+     - Insertion des données d'exemple
+   - **Alternative**: Exécuter `database/schema.sql` puis `database/seed_data.sql`
 
 3. **Configurer la base de données**
    - Éditer `config/database.php`
@@ -155,110 +155,41 @@ Système complet de gestion de plantes d'intérieur avec catalogue, assistant pe
    - Éditer `config/constants.php`
    - Modifier `BASE_URL` selon votre configuration:
      ```php
-     define('BASE_URL', 'http://localhost/JobinTech/PHP/Plants');
+     define('BASE_URL', 'http://localhost/Plants-main');
      ```
 
-5. **Ajouter la vidéo d'arrière-plan (optionnel)**
-   - Placer votre vidéo dans `public/uploads/videos/hero-bg.webm`
-   - Formats supportés : MP4, WebM
-   - La vidéo sera automatiquement intégrée
-
-6. **Démarrer le serveur**
+5. **Démarrer le serveur**
    - Si vous utilisez XAMPP, démarrer Apache et MySQL
-   - Accéder à `http://localhost/JobinTech/PHP/Plants`
+   - Accéder à `http://localhost/Plants-main`
 
 ## 📁 Structure du projet
 
 ```
-Plants/
+Plants-main/
 ├── app/
 │   ├── controllers/          # Contrôleurs MVC
-│   │   ├── AdminController.php
-│   │   ├── AuthController.php
-│   │   ├── DashboardController.php
-│   │   ├── HomeController.php
-│   │   ├── MarketplaceController.php
-│   │   ├── NotificationController.php
-│   │   ├── PlantCatalogController.php
-│   │   ├── SocialController.php
-│   │   └── UserPlantController.php
 │   ├── models/               # Modèles de données
-│   │   ├── Cart.php
-│   │   ├── Comment.php
-│   │   ├── Notification.php
-│   │   ├── Order.php
-│   │   ├── PlantCareEvent.php
-│   │   ├── PlantCatalog.php
-│   │   ├── Post.php
-│   │   ├── Product.php
-│   │   ├── User.php
-│   │   ├── UserPlant.php
-│   │   └── WeatherService.php
-│   ├── helpers/              # Fonctions utilitaires
-│   │   └── cart_helper.php
 │   ├── views/                # Vues (templates)
-│   │   ├── layouts/
-│   │   │   ├── header.php
-│   │   │   └── footer.php
-│   │   ├── admin/
-│   │   │   ├── moderate.php
-│   │   │   ├── plants.php
-│   │   │   └── products.php
-│   │   ├── auth/
-│   │   │   ├── login.php
-│   │   │   ├── profile.php
-│   │   │   └── register.php
-│   │   ├── dashboard/
-│   │   │   └── index.php
-│   │   ├── errors/
-│   │   │   └── 404.php
-│   │   ├── home/
-│   │   │   └── index.php
-│   │   ├── marketplace/
-│   │   │   ├── cart.php
-│   │   │   ├── checkout.php
-│   │   │   ├── detail.php
-│   │   │   ├── index.php
-│   │   │   ├── order_success.php
-│   │   │   └── orders.php
-│   │   ├── notification/
-│   │   │   └── index.php
-│   │   ├── plant_catalog/
-│   │   │   ├── detail.php
-│   │   │   └── index.php
-│   │   ├── social/
-│   │   │   ├── create.php
-│   │   │   ├── detail.php
-│   │   │   ├── index.php
-│   │   │   └── profile.php
-│   │   └── user_plant/
-│   │       ├── detail.php
-│   │       └── index.php
-│   └── core/                 # Classes de base
-│       ├── Controller.php
-│       └── Router.php
+│   ├── core/                 # Classes de base
+│   └── helpers/              # Fonctions utilitaires
 ├── config/                   # Configuration
 │   ├── autoload.php
 │   ├── constants.php
 │   └── database.php
 ├── database/                 # Scripts SQL
-│   ├── schema.sql            # Schéma complet de la base de données
-│   ├── seed_data.sql        # Données d'exemple
-│   ├── migration_add_cart_table.sql
-│   ├── add_cart_table_only.sql
-│   ├── README_CART_MIGRATION.md
-│   └── INSTRUCTIONS_CART.md
+│   ├── SETUP_COMPLETE.sql   # Script complet (recommandé)
+│   ├── schema.sql            # Schéma de la base de données
+│   ├── seed_data.sql         # Données d'exemple
+│   └── add_philodendron_varieties.sql  # Données supplémentaires
 ├── public/                   # Point d'entrée public
 │   ├── index.php
 │   ├── assets/
 │   │   ├── css/
-│   │   │   └── style.css    # Styles complets avec mode sombre
-│   │   ├── js/
-│   │   │   └── main.js      # JavaScript pour interactions
-│   │   └── img/
-│   └── uploads/
-│       ├── avatars/         # Avatars des utilisateurs
-│       └── videos/          # Vidéos (ex: hero-bg.webm)
+│   │   │   └── style.css
+│   │   └── js/
+│   │       └── main.js
+│   ├── Images/               # Images statiques
+│   └── Video/                # Vidéos
 ├── index.php                 # Point d'entrée principal
 └── README.md
 ```
@@ -286,7 +217,7 @@ Le mode sombre est activé automatiquement selon la préférence de l'utilisateu
 
 ### Comptes par défaut
 
-Après avoir exécuté `seed_data.sql`, vous pouvez vous connecter avec:
+Après avoir exécuté `SETUP_COMPLETE.sql`, vous pouvez vous connecter avec:
 
 **Admin:**
 - Email: `admin@plants.com`
@@ -299,19 +230,19 @@ Après avoir exécuté `seed_data.sql`, vous pouvez vous connecter avec:
 ### Flux principaux
 
 1. **Inscription/Connexion**
-   - `/` → Cliquer sur "Inscription" ou "Connexion"
+   - Accéder à la page d'accueil
+   - Cliquer sur "Inscription" ou "Connexion"
    - Créer un compte ou se connecter
-   - Le panier de session sera synchronisé avec le panier en base de données
 
 2. **Explorer le catalogue**
-   - `/` → "Catalogue"
+   - Cliquer sur "Catalogue" dans le menu
+   - Utiliser le menu flottant pour filtrer par catégories
    - Filtrer et rechercher des plantes
-   - Voir les détails d'une plante avec guides complets
+   - Voir les détails d'une plante avec galerie d'images
 
 3. **Ajouter une plante à sa collection**
    - Sur la page de détails d'une plante
    - Cliquer sur "Ajouter à ma collection"
-   - Choisir le type (graine/plante mature)
    - Donner un surnom (optionnel)
    - Spécifier l'emplacement (optionnel)
 
@@ -323,34 +254,27 @@ Après avoir exécuté `seed_data.sql`, vous pouvez vous connecter avec:
    - Ajouter des notes personnalisées
 
 5. **Tableau de bord**
-   - Voir les plantes nécessitant des soins (arrosage, fertilisation)
-   - **Graphiques interactifs** :
-     - Répartition par emplacement
-     - Évolution mensuelle des ajouts
-     - Types de soins effectués
-     - Activité quotidienne
-   - Cartes de statistiques avec totaux
-   - Voir les recommandations météo
-   - Voir l'activité récente et les posts de la communauté
+   - Voir les plantes nécessitant des soins
+   - Graphiques interactifs avec statistiques
+   - Recommandations météo
+   - Activité récente et posts de la communauté
 
 6. **Marketplace**
    - Parcourir les produits par catégorie
-   - Ajouter au panier (panier persistant pour utilisateurs connectés)
-   - Le panier est sauvegardé et restauré automatiquement à la connexion
-   - Badge de panier en temps réel dans le header
+   - Ajouter au panier (panier persistant)
    - Passer commande
    - Voir l'historique des commandes
 
 7. **Communauté**
    - Créer des posts avec photos
-   - Liker et commenter (AJAX pour une expérience fluide)
+   - Liker et commenter
    - Voir les profils utilisateurs
-   - Demander de l'aide avec type de post "help"
+   - Demander de l'aide
 
 8. **Notifications**
-   - Badge de notification en temps réel dans le header
-   - Notifications pour rappels de soins
-   - Notifications sociales (likes, commentaires)
+   - Badge de notification en temps réel
+   - Rappels de soins
+   - Notifications sociales
    - Marquer comme lu
 
 ## 🔌 API et Endpoints
@@ -363,7 +287,7 @@ Le système utilise un routing simple basé sur les paramètres GET:
 
 ### Contrôleurs disponibles
 
-- `home` - Page d'accueil avec vidéo d'arrière-plan
+- `home` - Page d'accueil
 - `auth` - Authentification (login, register, logout, profile)
 - `plantCatalog` - Catalogue de plantes
 - `userPlant` - Gestion des plantes personnelles
@@ -381,191 +305,46 @@ Le système utilise un routing simple basé sur les paramètres GET:
 - Mes plantes: `/?controller=userPlant&action=index`
 - Dashboard: `/?controller=dashboard&action=index`
 - Panier: `/?controller=marketplace&action=cart`
-- Profil utilisateur: `/?controller=social&action=profile&user_id=1`
-
-### Endpoints AJAX
-
-- `/?controller=marketplace&action=getCartCount` - Obtenir le nombre d'articles dans le panier (JSON)
-- `/?controller=notification&action=getUnreadCount` - Obtenir le nombre de notifications non lues (JSON)
-- `/?controller=social&action=like` - Liker un post (AJAX, JSON)
 
 ## 🗄️ Base de données
 
-### Schéma complet
+### Installation
 
-Le système utilise MySQL avec le moteur InnoDB et l'encodage UTF-8.
+Exécuter `database/SETUP_COMPLETE.sql` pour une installation complète, ou :
+1. `database/schema.sql` pour créer les tables
+2. `database/seed_data.sql` pour les données d'exemple
+
+**📖 Pour plus de détails, voir `database/README.md`**
+
+### Partage de données entre machines
+
+**⚠️ Important : Ne jamais pousser des dumps de base de données sur GitHub !**
+
+- **Pour le développement** : Utilisez `seed_data.sql` (déjà inclus)
+- **Pour vos données personnelles** : Exportez séparément et partagez via USB/cloud (pas Git)
+- Voir `database/README.md` pour les instructions complètes
 
 ### Tables principales
 
-#### `users`
-- Gestion des utilisateurs
-- Champs : id, email, password (hashé), username, bio, avatar_url, role, city, created_at
-- Index : email, username
-
-#### `plant_catalog`
-- Catalogue de toutes les plantes disponibles
-- Champs : id, common_name, scientific_name, description, difficulty_level, light_requirement, water_requirement, humidity_preference, temperature_min, temperature_max, image_url, recommended_for_beginners, default_watering_interval_days, default_fertilizing_interval_days, seed_guide, mature_plant_guide, created_at, updated_at
-- Index : difficulty_level, light_requirement, common_name
-
-#### `user_plants`
-- Collection personnelle de chaque utilisateur
-- Champs : id, user_id, plant_catalog_id, nickname_for_plant, is_from_marketplace, purchase_date, acquisition_type, last_watering_date, last_fertilizing_date, custom_watering_interval_days, custom_fertilizing_interval_days, room_location, notes, created_at
-- Clés étrangères : user_id → users(id), plant_catalog_id → plant_catalog(id)
-- Index : user_id, plant_catalog_id
-
-#### `plant_care_events`
-- Historique des soins apportés aux plantes
-- Champs : id, user_plant_id, event_type (watering, fertilizing, repotting, other), event_date, notes, created_at
-- Clé étrangère : user_plant_id → user_plants(id)
-- Index : user_plant_id, event_date
-
-#### `plant_photos`
-- Photos des plantes des utilisateurs
-- Champs : id, user_plant_id, image_url, caption, created_at
-- Clé étrangère : user_plant_id → user_plants(id)
-
-#### `products`
-- Produits du marketplace
-- Champs : id, name, description, category (seed, plant, pot, soil, fertilizer, accessory), price, image_url, stock, is_seed, related_plant_catalog_id, created_at, updated_at
-- Clé étrangère : related_plant_catalog_id → plant_catalog(id)
-- Index : category, related_plant_catalog_id
-
-#### `cart_items`
-- **Panier persistant** pour utilisateurs connectés
-- Champs : id, user_id, product_id, quantity, created_at, updated_at
-- Clés étrangères : user_id → users(id), product_id → products(id)
-- Contrainte unique : (user_id, product_id)
-- Index : user_id, product_id
-
-#### `orders`
-- Commandes passées
-- Champs : id, user_id, total_amount, status (pending, processing, shipped, delivered, cancelled), shipping_address, created_at, updated_at
-- Clé étrangère : user_id → users(id)
-- Index : user_id, status
-
-#### `order_items`
-- Articles des commandes
-- Champs : id, order_id, product_id, quantity, unit_price
-- Clés étrangères : order_id → orders(id), product_id → products(id)
-- Index : order_id
-
-#### `posts`
-- Posts de la communauté
-- Champs : id, user_id, content_text, image_url, related_user_plant_id, post_type (normal, help, article), created_at, updated_at
-- Clés étrangères : user_id → users(id), related_user_plant_id → user_plants(id)
-- Index : user_id, post_type, created_at
-
-#### `post_likes`
-- Likes sur les posts
-- Champs : id, post_id, user_id, created_at
-- Clés étrangères : post_id → posts(id), user_id → users(id)
-- Contrainte unique : (post_id, user_id)
-- Index : post_id, user_id
-
-#### `comments`
-- Commentaires sur les posts
-- Champs : id, post_id, user_id, content_text, created_at
-- Clés étrangères : post_id → posts(id), user_id → users(id)
-- Index : post_id, user_id
-
-#### `notifications`
-- Notifications système
-- Champs : id, user_id, type, message, link_url, is_read, created_at
-- Clé étrangère : user_id → users(id)
-- Index : user_id, is_read, created_at
-
-### Relations principales
-
-```
-users
-  ├── user_plants (1:N)
-  │     └── plant_care_events (1:N)
-  │     └── plant_photos (1:N)
-  ├── cart_items (1:N)
-  ├── orders (1:N)
-  │     └── order_items (1:N)
-  ├── posts (1:N)
-  │     ├── post_likes (1:N)
-  │     └── comments (1:N)
-  └── notifications (1:N)
-
-plant_catalog
-  ├── user_plants (1:N)
-  └── products (1:N)
-```
-
-### Visualisation du schéma
-
-Pour visualiser le schéma de la base de données, vous pouvez utiliser :
-
-```sql
--- Dans MySQL Workbench ou phpMyAdmin
-SHOW TABLES;
-DESCRIBE table_name;
-```
-
-Ou utiliser des outils comme :
-- MySQL Workbench (Reverse Engineering)
-- phpMyAdmin (Designer)
-- DBeaver
-- dbdiagram.io
+- `users` - Utilisateurs
+- `plant_catalog` - Catalogue de plantes
+- `plant_catalog_images` - Images multiples par plante
+- `user_plants` - Collection personnelle
+- `plant_care_events` - Historique des soins
+- `products` - Produits marketplace
+- `cart_items` - Panier persistant
+- `orders` / `order_items` - Commandes
+- `posts` / `post_likes` / `comments` - Communauté
+- `notifications` - Notifications système
 
 ## 🔒 Sécurité
 
 - **Protection SQL injection** : Utilisation exclusive de prepared statements (PDO)
 - **Hashage des mots de passe** : `password_hash()` avec algorithme bcrypt
 - **Sessions PHP sécurisées** : Configuration sécurisée des sessions
-- **Validation des entrées utilisateur** : Validation côté serveur
-- **Protection CSRF** : À implémenter pour les formulaires critiques
+- **Validation des entrées** : Validation côté serveur
 - **Échappement des sorties** : `htmlspecialchars()` pour toutes les sorties HTML
 - **Contrôle d'accès** : Vérification des rôles utilisateur
-- **Sanitization** : Nettoyage des données utilisateur
-
-## 🎨 Améliorations récentes
-
-### Interface utilisateur
-- ✅ Header moderne avec design élégant, gradients et animations
-- ✅ Footer redesigné avec sections organisées et animations
-- ✅ Mode sombre complet avec toggle dans le header
-- ✅ Badges animés pour panier et notifications en temps réel
-- ✅ Menu hamburger responsive avec animations fluides
-- ✅ Navigation sticky avec effet au scroll
-
-### Dashboard
-- ✅ Graphiques Chart.js interactifs :
-  - Graphique en donut : Répartition des plantes par emplacement
-  - Graphique en barres : Évolution mensuelle (6 mois)
-  - Graphique en camembert : Types de soins (30 jours)
-  - Graphique linéaire : Activité quotidienne (30 jours)
-- ✅ Cartes de statistiques avec icônes animées
-- ✅ Animations d'apparition pour tous les graphiques
-
-### Page d'accueil
-- ✅ Vidéo d'arrière-plan en plein écran
-- ✅ Overlay rose subtil pour mettre en valeur les fleurs
-- ✅ Animations d'apparition du contenu
-- ✅ Design responsive optimisé
-
-### Panier
-- ✅ Panier persistant en base de données
-- ✅ Synchronisation automatique à la connexion
-- ✅ Badge de panier en temps réel
-- ✅ Mise à jour AJAX du nombre d'articles
-
-### Notifications
-- ✅ Badge de notification en temps réel
-- ✅ Mise à jour automatique toutes les 30 secondes
-- ✅ Interface de notifications améliorée
-
-## 📝 Notes
-
-- Le système est conçu pour être extensible et modulaire
-- Les images sont actuellement gérées via URLs (à améliorer avec upload de fichiers)
-- L'API météo utilise des données mockées par défaut (configurable)
-- Le système de paiement est simulé (pas de vrai paiement)
-- **Panier persistant** : Le panier des utilisateurs connectés est sauvegardé en base de données et persiste après déconnexion. Les utilisateurs non connectés utilisent un panier basé sur la session.
-- Le mode sombre est stocké dans le localStorage du navigateur
-- Les graphiques du dashboard nécessitent Chart.js (chargé via CDN)
 
 ## 🤝 Contribution
 
@@ -575,12 +354,11 @@ Ce projet est un système complet et fonctionnel. Vous pouvez l'étendre avec:
 - Système de paiement réel (Stripe, PayPal, etc.)
 - Notifications email
 - API REST complète
-- Application mobile (React Native, Flutter)
+- Application mobile
 - Système de recherche avancée
 - Export de données (PDF, Excel)
 - Calendrier de soins visuel
-- Système de tags pour les plantes
-- Recommandations IA basées sur l'environnement
+- Recommandations IA
 
 ## 📄 Licence
 

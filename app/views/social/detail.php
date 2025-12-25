@@ -6,7 +6,11 @@ $pageTitle = 'Post';
     <div class="post-detail-page" id="post-detail">
         <div class="post-card">
             <div class="post-header">
-                <img src="<?php echo htmlspecialchars($post['avatar_url'] ?? 'https://via.placeholder.com/40'); ?>" alt="" class="avatar">
+                <?php 
+                $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                $avatarUrl = !empty($post['avatar_url']) ? $post['avatar_url'] : $defaultAvatar;
+                ?>
+                <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="" class="avatar">
                 <div>
                     <strong><?php echo htmlspecialchars($post['username']); ?></strong>
                     <span class="post-date"><?php echo date('d/m/Y H:i', strtotime($post['created_at'])); ?></span>
@@ -62,7 +66,11 @@ $pageTitle = 'Post';
                     <?php foreach ($comments as $comment): ?>
                         <div class="comment-card">
                             <div class="comment-header">
-                                <img src="<?php echo htmlspecialchars($comment['avatar_url'] ?? 'https://via.placeholder.com/30'); ?>" alt="" class="avatar-small">
+                                <?php 
+                                $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                                $commentAvatarUrl = !empty($comment['avatar_url']) ? $comment['avatar_url'] : $defaultAvatar;
+                                ?>
+                                <img src="<?php echo htmlspecialchars($commentAvatarUrl); ?>" alt="" class="avatar-small">
                                 <strong><?php echo htmlspecialchars($comment['username']); ?></strong>
                                 <span class="comment-date"><?php echo date('d/m/Y H:i', strtotime($comment['created_at'])); ?></span>
                             </div>

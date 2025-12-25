@@ -28,10 +28,37 @@ class Product {
         
         $whereClause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
         
+        // Handle sorting
+        $sortBy = $filters['sort'] ?? 'featured';
+        $orderBy = "ORDER BY ";
+        switch ($sortBy) {
+            case 'price_asc':
+                $orderBy .= "price ASC";
+                break;
+            case 'price_desc':
+                $orderBy .= "price DESC";
+                break;
+            case 'name_asc':
+                $orderBy .= "name ASC";
+                break;
+            case 'name_desc':
+                $orderBy .= "name DESC";
+                break;
+            case 'created_desc':
+                $orderBy .= "created_at DESC";
+                break;
+            case 'created_asc':
+                $orderBy .= "created_at ASC";
+                break;
+            default: // 'featured'
+                $orderBy .= "name ASC";
+                break;
+        }
+        
         $params[] = $limit;
         $params[] = $offset;
         
-        $sql = "SELECT * FROM products $whereClause ORDER BY name LIMIT ? OFFSET ?";
+        $sql = "SELECT * FROM products $whereClause $orderBy LIMIT ? OFFSET ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $products = $stmt->fetchAll();
@@ -100,8 +127,8 @@ class Product {
     public function create($data) {
         $stmt = $this->db->prepare("
             INSERT INTO products 
-            (name, description, category, price, image_url, stock, is_seed, related_plant_catalog_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (name, description, category, price, image_url, stock, related_plant_catalog_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         
         return $stmt->execute([
@@ -111,7 +138,6 @@ class Product {
             $data['price'],
             $data['image_url'] ?? null,
             $data['stock'] ?? 0,
-            $data['is_seed'] ?? false,
             $data['related_plant_catalog_id'] ?? null
         ]);
     }
@@ -121,7 +147,7 @@ class Product {
         $values = [];
         
         $allowedFields = ['name', 'description', 'category', 'price', 'image_url', 
-                         'stock', 'is_seed', 'related_plant_catalog_id'];
+                         'stock', 'related_plant_catalog_id'];
         
         foreach ($allowedFields as $field) {
             if (isset($data[$field])) {

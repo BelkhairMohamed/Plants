@@ -302,10 +302,11 @@ class SocialController extends Controller {
                 $isFollowing = $this->followModel->isFollowing($_SESSION['user_id'], $user['id']);
                 $followersCount = $this->followModel->getFollowersCount($user['id']);
                 
+                $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
                 $results[] = [
                     'id' => $user['id'],
                     'username' => $user['username'],
-                    'avatar_url' => $user['avatar_url'] ?? 'https://via.placeholder.com/150',
+                    'avatar_url' => !empty($user['avatar_url']) ? $user['avatar_url'] : $defaultAvatar,
                     'bio' => $user['bio'] ?? '',
                     'isFollowing' => $isFollowing,
                     'followersCount' => $followersCount

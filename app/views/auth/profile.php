@@ -19,7 +19,11 @@ $pageTitle = 'Modifier mon profil';
                 <h2>Photo de profil</h2>
                 <div class="avatar-upload-section">
                     <div class="current-avatar">
-                        <img src="<?php echo htmlspecialchars($user['avatar_url'] ?? 'https://via.placeholder.com/150'); ?>" alt="Avatar actuel" id="avatar-preview">
+                        <?php 
+                        $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                        $avatarUrl = !empty($user['avatar_url']) ? $user['avatar_url'] : $defaultAvatar;
+                        ?>
+                        <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="Avatar actuel" id="avatar-preview">
                     </div>
                     <form method="POST" action="<?php echo BASE_URL; ?>/?controller=auth&action=profile" enctype="multipart/form-data" class="avatar-form" id="avatarForm">
                         <div class="form-group">

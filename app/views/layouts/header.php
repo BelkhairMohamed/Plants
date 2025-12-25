@@ -43,17 +43,22 @@
                     // Get user avatar
                     $userModel = new User();
                     $currentUser = $userModel->findById($_SESSION['user_id']);
-                    $userAvatar = $currentUser['avatar_url'] ?? 'https://via.placeholder.com/150';
+                    $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                    $userAvatar = !empty($currentUser['avatar_url']) ? $currentUser['avatar_url'] : $defaultAvatar;
                     ?>
                     <button class="search-toggle-btn" id="search-toggle-btn" title="Rechercher des utilisateurs">
                         <i class="fas fa-search"></i>
                     </button>
-                    <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=cart" class="navbar-icon-link cart-link" title="Panier" id="cart-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <?php
-                        $cartCount = getCartCount();
-                        echo "<span class='badge cart-badge' id='cart-badge' style='display: " . ($cartCount > 0 ? 'inline-flex' : 'none') . ";'>$cartCount</span>";
-                        ?>
+                    <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=cart" class="navbar-icon-link cart-link pot-icon-link" title="Panier" id="cart-link">
+                        <div class="pot-icon-container">
+                            <i class="fas fa-seedling pot-icon-fa"></i>
+                            <?php
+                            $cartCount = getCartCount();
+                            if ($cartCount > 0) {
+                                echo "<span class='pot-count-number' id='cart-badge'>$cartCount</span>";
+                            }
+                            ?>
+                        </div>
                     </a>
                     <a href="<?php echo BASE_URL; ?>/?controller=notification&action=index" class="navbar-icon-link notification-link" title="Notifications">
                         <i class="fas fa-bell"></i>
@@ -86,13 +91,75 @@
         <?php if (isset($_SESSION['user_id'])): ?>
         <div class="navbar-sub">
             <div class="navbar-sub-container">
-                <a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index" class="navbar-sub-link">Catalogue</a>
-                <a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index" class="navbar-sub-link">Tableau de bord</a>
-                <a href="<?php echo BASE_URL; ?>/?controller=social&action=index" class="navbar-sub-link">Communauté</a>
-                <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="navbar-sub-link">Boutique</a>
-                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                    <a href="<?php echo BASE_URL; ?>/?controller=admin&action=plants" class="navbar-sub-link">Admin</a>
-                <?php endif; ?>
+                <button class="navbar-sub-hamburger" id="navbar-sub-hamburger" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="navbar-sub-overlay" id="navbar-sub-overlay"></div>
+                <div class="navbar-sub-menu" id="navbar-sub-menu">
+                    <div class="navbar-sub-menu-header">
+                        <h3>Menu</h3>
+                        <button class="navbar-sub-menu-close" id="navbar-sub-menu-close" aria-label="Fermer">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="navbar-sub-menu-content">
+                        <div class="nav-item-dropdown">
+                            <a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index" class="navbar-sub-link nav-link-dropdown">
+                                <i class="fas fa-book"></i> Catalogue <i class="fas fa-chevron-down"></i>
+                            </a>
+                            <div class="dropdown-menu-bloomscape">
+                                <div class="dropdown-menu-content">
+                                    <div class="dropdown-menu-section">
+                                        <h4 class="dropdown-section-title">INDOOR PLANTS</h4>
+                                        <ul class="dropdown-menu-list">
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index&filter=bestsellers">Best Sellers</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index&filter=gifts">Holiday Gift Favorites</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&category=self_watering">Self-Watering Plants</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index&filter=new">New Arrivals</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&difficulty=beginner">Low-Maintenance Plants</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&light=low">Best Houseplants for Low Light</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&category=pet_friendly">Pet-Friendly Plants</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&category=cold_weather">Cold Weather Plants</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index&category=air_purifying">Air Purifying Plants</a></li>
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=plantCatalog&action=index" class="dropdown-all-link">SHOP ALL ITEMS</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nav-item-dropdown">
+                            <a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index" class="navbar-sub-link nav-link-dropdown">
+                                <i class="fas fa-tachometer-alt"></i> Tableau de bord <i class="fas fa-chevron-down"></i>
+                            </a>
+                            <div class="dropdown-menu-bloomscape">
+                                <div class="dropdown-menu-content">
+                                    <div class="dropdown-menu-section">
+                                        <h4 class="dropdown-section-title">DASHBOARDS</h4>
+                                        <ul class="dropdown-menu-list">
+                                            <li><a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=index"><i class="fas fa-chart-line"></i> Tableau de bord</a></li>
+                                            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                                                <li><a href="<?php echo BASE_URL; ?>/?controller=dashboard&action=adminDashboard"><i class="fas fa-shield-alt"></i> Tableau administratif</a></li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="<?php echo BASE_URL; ?>/?controller=social&action=index" class="navbar-sub-link">
+                            <i class="fas fa-users"></i> Communauté
+                        </a>
+                        <a href="<?php echo BASE_URL; ?>/?controller=marketplace&action=index" class="navbar-sub-link">
+                            <i class="fas fa-store"></i> Boutique
+                        </a>
+                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                            <a href="<?php echo BASE_URL; ?>/?controller=admin&action=plants" class="navbar-sub-link">
+                                <i class="fas fa-cog"></i> Admin
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <div class="navbar-sub-spacer"></div>
                 <label class="dark-mode-toggle" aria-label="Toggle dark mode">
                     <input type="checkbox" id="dark-mode-switch">

@@ -70,7 +70,8 @@ class MarketplaceController extends Controller {
     public function index() {
         $filters = [
             'category' => $_GET['category'] ?? null,
-            'search' => $_GET['search'] ?? null
+            'search' => $_GET['search'] ?? null,
+            'sort' => $_GET['sort'] ?? 'featured'
         ];
         
         $page = max(1, intval($_GET['page'] ?? 1));
@@ -102,10 +103,24 @@ class MarketplaceController extends Controller {
             return;
         }
         
-        // Get product images
-        $images = $this->productModel->getImages($id);
+        // Get product images - prioritize plant_catalog_images if related_plant_catalog_id exists
+        $images = [];
         
-        // If no images in product_images table, use image_url as fallback
+        if (!empty($product['related_plant_catalog_id'])) {
+            // Get images from plant_catalog_images
+            $plantModel = new PlantCatalog();
+            $plantImages = $plantModel->getImages($product['related_plant_catalog_id']);
+            if (!empty($plantImages)) {
+                $images = array_column($plantImages, 'image_url');
+            }
+        }
+        
+        // If no plant images, try product_images table
+        if (empty($images)) {
+            $images = $this->productModel->getImages($id);
+        }
+        
+        // If still no images, use image_url as fallback
         if (empty($images) && !empty($product['image_url'])) {
             $images = [$product['image_url']];
         }

@@ -4,7 +4,7 @@
  */
 
 // Base URL
-define('BASE_URL', 'http://localhost/JobinTech/PHP/Plants');
+define('BASE_URL', 'http://localhost/php/Plants');
 
 // Paths
 define('ROOT_PATH', __DIR__ . '/..');

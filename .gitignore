@@ -29,5 +29,26 @@ temp/
 vendor/
 composer.lock
 
+# Database backups and temporary SQL files
+# NOTE: Removed to allow committing all SQL files
+# *.sql.bak
+# *.sql.tmp
+# *.sql.gz
+# *.sql.zip
+# database_backup.sql
+# database_export.sql
+# dump.sql
 
+# Temporary files
+*.tmp
+*.bak
+*~
 
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

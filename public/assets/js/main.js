@@ -649,4 +649,71 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })();
 
+// Sub-header hamburger menu toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const subHamburger = document.getElementById('navbar-sub-hamburger');
+    const subMenu = document.getElementById('navbar-sub-menu');
+    const subOverlay = document.getElementById('navbar-sub-overlay');
+    const subMenuClose = document.getElementById('navbar-sub-menu-close');
+    
+    if (subHamburger && subMenu) {
+        function openMenu() {
+            subHamburger.classList.add('active');
+            subMenu.classList.add('active');
+            if (subOverlay) {
+                subOverlay.classList.add('active');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMenu() {
+            subHamburger.classList.remove('active');
+            subMenu.classList.remove('active');
+            if (subOverlay) {
+                subOverlay.classList.remove('active');
+            }
+            document.body.style.overflow = '';
+        }
+        
+        subHamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (subMenu.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+        
+        // Close menu button
+        if (subMenuClose) {
+            subMenuClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeMenu();
+            });
+        }
+        
+        // Close menu when clicking on overlay
+        if (subOverlay) {
+            subOverlay.addEventListener('click', function() {
+                closeMenu();
+            });
+        }
+        
+        // Close menu when clicking on a link
+        const subLinks = subMenu.querySelectorAll('a');
+        subLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                closeMenu();
+            });
+        });
+        
+        // Close menu on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && subMenu.classList.contains('active')) {
+                closeMenu();
+            }
+        });
+    }
+});
+
 

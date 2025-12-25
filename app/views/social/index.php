@@ -20,7 +20,11 @@ $pageTitle = 'Communauté';
                 <div class="post-card">
                     <div class="post-header">
                         <a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $post['user_id']; ?>" class="post-user-link">
-                            <img src="<?php echo htmlspecialchars($post['avatar_url'] ?? 'https://via.placeholder.com/40'); ?>" alt="" class="avatar">
+                            <?php 
+                            $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                            $avatarUrl = !empty($post['avatar_url']) ? $post['avatar_url'] : $defaultAvatar;
+                            ?>
+                            <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="" class="avatar">
                         </a>
                         <div>
                             <a href="<?php echo BASE_URL; ?>/?controller=social&action=profile&user_id=<?php echo $post['user_id']; ?>" class="post-username-link">

@@ -11,27 +11,73 @@ class PlantCatalogController extends Controller {
     }
     
     public function index() {
+        // Handle category filter - can be from URL (category_slug) or form (categories array)
+        $categories = [];
+        $categorySlug = null;
+        
+        if (isset($_GET['category'])) {
+            // Single category from URL (slug)
+            $categorySlug = $_GET['category'];
+        } elseif (isset($_GET['categories']) && is_array($_GET['categories'])) {
+            // Multiple categories from form
+            $categories = array_filter(array_map('intval', $_GET['categories']));
+        } elseif (isset($_GET['filter'])) {
+            // Legacy filter support (for backward compatibility)
+            $categorySlug = $_GET['filter'];
+        }
+        
+        // Handle legacy pet_friendly parameter
+        if (isset($_GET['pet_friendly']) && $_GET['pet_friendly'] == '1') {
+            $categorySlug = 'pet_friendly';
+        }
+        
         $filters = [
             'difficulty_level' => $_GET['difficulty'] ?? null,
             'light_requirement' => $_GET['light'] ?? null,
             'water_requirement' => $_GET['water'] ?? null,
+            'humidity_preference' => $_GET['humidity'] ?? null,
             'recommended_for_beginners' => isset($_GET['beginners']) ? true : null,
-            'search' => $_GET['search'] ?? null
+            'search' => $_GET['search'] ?? null,
+            'sort' => $_GET['sort'] ?? 'featured'
         ];
+        
+        // Add category filters
+        if ($categorySlug) {
+            $filters['category_slug'] = $categorySlug;
+        } elseif (!empty($categories)) {
+            $filters['categories'] = $categories;
+        }
         
         $page = max(1, intval($_GET['page'] ?? 1));
         $limit = 12;
         $offset = ($page - 1) * $limit;
         
         $plants = $this->plantModel->getAll($filters, $limit, $offset);
+        
+        // Get first image for each plant from plant_catalog_images table
+        foreach ($plants as &$plant) {
+            $plantImages = $this->plantModel->getImages($plant['id']);
+            if (!empty($plantImages)) {
+                // Use first image from plant_catalog_images
+                $plant['image_url'] = $plantImages[0]['image_url'];
+            }
+            // If no images in plant_catalog_images, keep the original image_url from plant_catalog
+        }
+        unset($plant); // Break reference
+        
         $total = $this->plantModel->count($filters);
         $totalPages = ceil($total / $limit);
+        
+        // Get all categories for the filter sidebar
+        $allCategories = $this->plantModel->getAllCategories();
         
         $this->view('plant_catalog/index', [
             'plants' => $plants,
             'filters' => $filters,
             'currentPage' => $page,
-            'totalPages' => $totalPages
+            'totalPages' => $totalPages,
+            'allCategories' => $allCategories,
+            'selectedCategories' => $categories
         ]);
     }
     
@@ -51,6 +97,14 @@ class PlantCatalogController extends Controller {
             return;
         }
         
+        // Get all images for this plant
+        $plantImages = $this->plantModel->getImages($id);
+        
+        // If no images in plant_catalog_images table, use image_url as fallback
+        if (empty($plantImages) && !empty($plant['image_url'])) {
+            $plantImages = [['image_url' => $plant['image_url']]];
+        }
+        
         // Check if user already owns this plant
         $userOwnsPlant = false;
         if (isset($_SESSION['user_id'])) {
@@ -58,9 +112,14 @@ class PlantCatalogController extends Controller {
             $userOwnsPlant = $userPlantModel->userOwnsPlant($_SESSION['user_id'], $id);
         }
         
+        // Get categories for this plant
+        $plantCategories = $this->plantModel->getPlantCategories($id);
+        
         $this->view('plant_catalog/detail', [
             'plant' => $plant,
-            'userOwnsPlant' => $userOwnsPlant
+            'plantImages' => $plantImages,
+            'userOwnsPlant' => $userOwnsPlant,
+            'plantCategories' => $plantCategories
         ]);
     }
     

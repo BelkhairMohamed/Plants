@@ -6,7 +6,11 @@ $pageTitle = 'Profil - ' . htmlspecialchars($user['username']);
     <div class="instagram-profile">
         <div class="profile-header-instagram">
             <div class="profile-avatar-instagram">
-                <img src="<?php echo htmlspecialchars($user['avatar_url'] ?? 'https://via.placeholder.com/150'); ?>" alt="<?php echo htmlspecialchars($user['username']); ?>" class="avatar-large">
+                <?php 
+                $defaultAvatar = BASE_URL . '/public/Images/profile-icon-symbol-design-illustration-vector.jpg';
+                $avatarUrl = !empty($user['avatar_url']) ? $user['avatar_url'] : $defaultAvatar;
+                ?>
+                <img src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="<?php echo htmlspecialchars($user['username']); ?>" class="avatar-large">
             </div>
             <div class="profile-info-instagram">
                 <div class="profile-header-top">

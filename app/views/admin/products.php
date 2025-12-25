@@ -58,13 +58,6 @@ $pageTitle = 'Administration - Produits';
                 </div>
             </div>
             
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="is_seed">
-                    Est une graine
-                </label>
-            </div>
-            
             <button type="submit" class="btn btn-primary">Ajouter</button>
         </form>
     </div>
