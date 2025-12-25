@@ -351,7 +351,6 @@ Exécuter `database/SETUP_COMPLETE.sql` pour une installation complète, ou :
 Ce projet est un système complet et fonctionnel. Vous pouvez l'étendre avec:
 
 - Upload d'images pour les plantes et avatars
-- Système de paiement réel (Stripe, PayPal, etc.)
 - Notifications email
 - API REST complète
 - Application mobile
