@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : dim. 14 déc. 2025 à 22:33
+-- Généré le : jeu. 25 déc. 2025 à 14:10
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -36,12 +36,31 @@ CREATE TABLE `cart_items` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Déchargement des données de la table `cart_items`
+-- Structure de la table `categories`
 --
 
-INSERT INTO `cart_items` (`id`, `user_id`, `product_id`, `quantity`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 3, '2025-12-14 19:35:45', '2025-12-14 19:38:28');
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `created_at`) VALUES
+(1, 'Self-Watering Plants', 'self_watering', 'Plants that can survive with minimal watering or have self-watering systems', '2025-12-25 12:12:44'),
+(2, 'Pet-Friendly Plants', 'pet_friendly', 'Non-toxic plants safe for pets', '2025-12-25 12:12:44'),
+(3, 'Air Purifying Plants', 'air_purifying', 'Plants that help improve indoor air quality', '2025-12-25 12:12:44'),
+(4, 'Cold Weather Plants', 'cold_weather', 'Plants that can tolerate lower temperatures', '2025-12-25 12:12:44'),
+(5, 'Giant Plants', 'giant_plants', 'Large plants perfect for statement pieces', '2025-12-25 12:12:44'),
+(6, 'Low-Maintenance Plants', 'low_maintenance', 'Easy-care plants perfect for beginners', '2025-12-25 12:12:44');
 
 -- --------------------------------------------------------
 
@@ -102,6 +121,13 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Déchargement des données de la table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `total_amount`, `status`, `shipping_address`, `created_at`, `updated_at`) VALUES
+(1, 1, 89.97, 'pending', 'amal5 n292 rabat\r\n', '2025-12-25 10:26:35', '2025-12-25 10:26:35');
+
 -- --------------------------------------------------------
 
 --
@@ -115,6 +141,13 @@ CREATE TABLE `order_items` (
   `quantity` int(11) NOT NULL,
   `unit_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `unit_price`) VALUES
+(1, 1, 1, 3, 29.99);
 
 -- --------------------------------------------------------
 
@@ -172,9 +205,10 @@ INSERT INTO `plant_catalog` (`id`, `common_name`, `scientific_name`, `descriptio
 (7, 'Spider Plant', 'Chlorophytum comosum', 'Easy-to-grow plant that produces baby plantlets. Perfect for hanging baskets.', 'beginner', 'medium', 'medium', 'medium', 15, 26, 'https://images.unsplash.com/photo-1593691501777-1c0e0a1a3a1a?w=400', 1, 7, 30, 'Plant seeds in well-draining soil. Keep moist. Germination in 2-3 weeks. Or propagate from plantlets.', 'Water when top inch of soil is dry. Prefers bright indirect light. Produces plantlets that can be propagated. Fertilize monthly during growing season.', '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
 (8, 'Rubber Plant', 'Ficus elastica', 'A bold plant with large, glossy leaves. Adds a statement to any room.', 'intermediate', 'medium', 'medium', 'medium', 18, 24, 'https://images.unsplash.com/photo-1593691501777-1c0e0a1a3a1a?w=400', 0, 7, 30, 'Not typically grown from seed. Purchase as young plant.', 'Water when top 2-3cm of soil is dry. Prefers bright indirect light. Wipe leaves occasionally to keep them shiny. Fertilize monthly during growing season.', '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
 (9, 'Alocasia', 'Alocasia amazonica', 'Dramatic plant with arrow-shaped leaves and striking veins. Requires high humidity.', 'advanced', 'medium', 'high', 'high', 20, 25, 'https://images.unsplash.com/photo-1593691501777-1c0e0a1a3a1a?w=400', 0, 5, 30, 'Plant tubers in well-draining soil. Keep warm and humid. Germination can be slow.', 'Keep soil consistently moist. Needs high humidity (60%+). Prefers bright indirect light. Mist regularly or use pebble tray. Fertilize every 2 weeks during growing season.', '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
-(11, 'Philodendron Birken', 'Philodendron birkin', 'Le Philodendron Birken est une variété rare et élégante avec des feuilles vert foncé marquées de rayures blanches distinctives. Cette plante est un cultivar qui produit des feuilles uniques avec des motifs en rayures qui deviennent plus prononcés avec l\'âge. C\'est une plante d\'intérieur très recherchée pour son apparence distinctive.', 'beginner', 'medium', 'medium', 'medium', 18, 26, NULL, 1, 7, 30, NULL, 'Arrosage: Arrosez lorsque le premier centimètre du sol est sec. Évitez l\'eau stagnante.\n\nLumière: Lumière indirecte brillante. Évitez la lumière directe du soleil.\n\nHumidité: Apprécie une humidité modérée. Brumisez les feuilles occasionnellement.\n\nEngrais: Fertilisez mensuellement pendant la saison de croissance (printemps-été).\n\nTaille: Taillez les feuilles mortes ou jaunies pour encourager une nouvelle croissance.', '2025-12-14 18:41:47', '2025-12-14 18:41:47'),
+(11, 'Philodendron Birken', 'Philodendron birkin', 'Le Philodendron Birken est une variété rare et élégante avec des feuilles vert foncé marquées de rayures blanches distinctives. Cette plante est un cultivar qui produit des feuilles uniques avec des motifs en rayures qui deviennent plus prononcés avec l\'âge. C\'est une plante d\'intérieur très recherchée pour son apparence distinctive.', 'beginner', 'medium', 'medium', 'medium', 18, 26, '', 1, 7, 30, '', 'Arrosage: Arrosez lorsque le premier centimètre du sol est sec. Évitez l\'eau stagnante.\r\n\r\nLumière: Lumière indirecte brillante. Évitez la lumière directe du soleil.\r\n\r\nHumidité: Apprécie une humidité modérée. Brumisez les feuilles occasionnellement.\r\n\r\nEngrais: Fertilisez mensuellement pendant la saison de croissance (printemps-été).\r\n\r\nTaille: Taillez les feuilles mortes ou jaunies pour encourager une nouvelle croissance.', '2025-12-14 18:41:47', '2025-12-25 12:17:46'),
 (12, 'Philodendron Sun Red', 'Philodendron erubescens', 'Le Philodendron Sun Red est une variété magnifique avec des feuilles qui présentent des teintes rouges et vertes vibrantes. Les nouvelles feuilles émergent souvent dans des tons de rouge ou de rose, créant un contraste saisissant avec les feuilles matures vertes. Cette plante est appréciée pour sa couleur unique et sa facilité d\'entretien.', 'beginner', 'medium', 'medium', 'medium', 18, 26, NULL, 1, 7, 30, NULL, 'Arrosage: Maintenez le sol légèrement humide mais pas détrempé. Arrosez lorsque le sol est sec au toucher.\n\nLumière: Lumière indirecte brillante à moyenne. Peut tolérer une lumière plus faible.\n\nHumidité: Préfère une humidité modérée à élevée. Brumisez régulièrement pour maintenir l\'humidité.\n\nEngrais: Appliquez un engrais équilibré toutes les 4-6 semaines pendant la saison de croissance.\n\nSupport: Cette plante peut bénéficier d\'un tuteur ou d\'un support pour grimper.', '2025-12-14 18:41:47', '2025-12-14 18:41:47'),
-(13, 'Philodendron Hope Selloum', 'Philodendron bipinnatifidum', 'Le Philodendron Hope Selloum est une plante imposante avec de grandes feuilles profondément lobées qui créent un effet tropical spectaculaire. Cette variété peut atteindre une taille considérable et est parfaite comme plante d\'accent dans de grands espaces. Les feuilles vert foncé brillantes et profondément découpées donnent à cette plante un aspect exotique et luxuriant.', 'intermediate', 'medium', 'medium', 'high', 18, 27, NULL, 0, 7, 30, NULL, 'Arrosage: Arrosez abondamment lorsque le sol est sec au toucher, mais laissez le sol sécher entre les arrosages.\n\nLumière: Lumière indirecte brillante. Peut tolérer une lumière moyenne mais poussera plus lentement.\n\nHumidité: Nécessite une humidité élevée. Utilisez un humidificateur ou placez sur un plateau de galets avec de l\'eau.\n\nEspace: Cette plante peut devenir très grande. Assurez-vous d\'avoir suffisamment d\'espace pour sa croissance.\n\nEngrais: Fertilisez toutes les 4-6 semaines pendant la saison de croissance avec un engrais équilibré.\n\nNettoyage: Essuyez régulièrement les grandes feuilles pour maintenir leur éclat.', '2025-12-14 18:41:47', '2025-12-14 18:41:47');
+(13, 'Philodendron Hope Selloum', 'Philodendron bipinnatifidum', 'Le Philodendron Hope Selloum est une plante imposante avec de grandes feuilles profondément lobées qui créent un effet tropical spectaculaire. Cette variété peut atteindre une taille considérable et est parfaite comme plante d\'accent dans de grands espaces. Les feuilles vert foncé brillantes et profondément découpées donnent à cette plante un aspect exotique et luxuriant.', 'intermediate', 'medium', 'medium', 'high', 18, 27, NULL, 0, 7, 30, NULL, 'Arrosage: Arrosez abondamment lorsque le sol est sec au toucher, mais laissez le sol sécher entre les arrosages.\n\nLumière: Lumière indirecte brillante. Peut tolérer une lumière moyenne mais poussera plus lentement.\n\nHumidité: Nécessite une humidité élevée. Utilisez un humidificateur ou placez sur un plateau de galets avec de l\'eau.\n\nEspace: Cette plante peut devenir très grande. Assurez-vous d\'avoir suffisamment d\'espace pour sa croissance.\n\nEngrais: Fertilisez toutes les 4-6 semaines pendant la saison de croissance avec un engrais équilibré.\n\nNettoyage: Essuyez régulièrement les grandes feuilles pour maintenir leur éclat.', '2025-12-14 18:41:47', '2025-12-14 18:41:47'),
+(14, 'Bamboo Plam', 'Chamaedorea seifrizii', 'The Bamboo Palm is a popular indoor plant known for its feathery, elegant fronds. It thrives in low to medium light and is easy to care for, making it a perfect choice for home or office spaces. In addition to its beauty, the Bamboo Palm is also known for its air-purifying qualities, helping to filter out toxins and improve indoor air quality. Its lush green appearance adds a touch of tranquility and nature to any room.', 'beginner', 'low', 'low', 'low', NULL, NULL, 'https://bloomscape.com/wp-content/uploads/2025/04/self-watering-charcoal-xxl-bamboo-palm-1.png?ver=1096527', 0, 7, 30, '', '', '2025-12-25 12:47:21', '2025-12-25 12:47:21');
 
 -- --------------------------------------------------------
 
@@ -217,7 +251,38 @@ INSERT INTO `plant_catalog_images` (`id`, `plant_catalog_id`, `image_url`, `disp
 (30, 13, 'https://bloomscape.com/wp-content/uploads/2020/08/bloomscape_philodendron-hope-selloum_detail.jpg?ver=279426', 0, '2025-12-14 18:43:10'),
 (31, 12, 'https://bloomscape.com/wp-content/uploads/2024/07/philo_sun_red_charcoal-e1721335677714.jpg?ver=1080174', 0, '2025-12-14 18:43:40'),
 (32, 12, 'https://bloomscape.com/wp-content/uploads/2024/07/philo_sun_red_0037-e1721400734189.jpg?ver=1080175', 0, '2025-12-14 18:43:59'),
-(33, 12, 'https://bloomscape.com/wp-content/uploads/2024/07/philo_sun_red_0041-e1721400168417.jpg?ver=1080176', 0, '2025-12-14 18:44:25');
+(33, 12, 'https://bloomscape.com/wp-content/uploads/2024/07/philo_sun_red_0041-e1721400168417.jpg?ver=1080176', 0, '2025-12-14 18:44:25'),
+(34, 11, 'https://bloomscape.com/wp-content/uploads/2023/08/230805_BB_philodendron_birkin_0799-e1692211717990-scaled.jpg?ver=1054903', 0, '2025-12-25 11:57:00'),
+(35, 11, 'https://bloomscape.com/wp-content/uploads/2023/08/230805_BB_philodendron_birkin_0804-e1692212345129.jpg?ver=1054905', 0, '2025-12-25 11:58:01'),
+(37, 11, 'https://bloomscape.com/wp-content/uploads/2023/08/230805_BB_philodendron_birkin_0927-scaled-e1692212629715.jpg?ver=1054921', 0, '2025-12-25 11:58:29'),
+(39, 11, 'https://bloomscape.com/wp-content/uploads/2021/03/bloomscape_philodendron_birkin_small_detail-scaled-e1692212133923.jpg?ver=473525', 0, '2025-12-25 11:59:07'),
+(40, 14, 'https://bloomscape.com/wp-content/uploads/2025/04/self-watering-charcoal-xxl-bamboo-palm-1.png?ver=1096527', 0, '2025-12-25 12:47:21'),
+(41, 14, 'https://bloomscape.com/wp-content/uploads/2020/08/bloomscape_bamboo-palm_detail.jpg?ver=279481', 0, '2025-12-25 12:48:22'),
+(42, 14, 'https://bloomscape.com/wp-content/uploads/2020/04/bloomscape_bamboo-palm_xl_detail_V2-scaled.jpeg?ver=586787', 0, '2025-12-25 12:48:46'),
+(43, 14, 'https://bloomscape.com/wp-content/uploads/2022/04/Bloomscape_bamboo_palm_x2_Location5485.jpg?ver=768676', 0, '2025-12-25 12:49:04');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `plant_category_assignments`
+--
+
+CREATE TABLE `plant_category_assignments` (
+  `id` int(11) NOT NULL,
+  `plant_catalog_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `plant_category_assignments`
+--
+
+INSERT INTO `plant_category_assignments` (`id`, `plant_catalog_id`, `category_id`, `created_at`) VALUES
+(1, 11, 3, '2025-12-25 12:17:46'),
+(2, 14, 3, '2025-12-25 12:47:21'),
+(3, 14, 2, '2025-12-25 12:47:21'),
+(4, 14, 1, '2025-12-25 12:47:21');
 
 -- --------------------------------------------------------
 
@@ -236,6 +301,13 @@ CREATE TABLE `posts` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Déchargement des données de la table `posts`
+--
+
+INSERT INTO `posts` (`id`, `user_id`, `content_text`, `image_url`, `related_user_plant_id`, `post_type`, `created_at`, `updated_at`) VALUES
+(1, 1, 'welcome to my community', 'https://media.istockphoto.com/id/816807384/vector/welcome-inscription-hand-drawn-lettering-greeting-card-with-calligraphy-handwritten-design.jpg?s=612x612&w=0&k=20&c=aaq_MBiakiX_lzv83f78v5RMU4S9frQeovD_FtQFXNU=', NULL, 'normal', '2025-12-25 11:32:33', '2025-12-25 11:32:33');
+
 -- --------------------------------------------------------
 
 --
@@ -248,6 +320,13 @@ CREATE TABLE `post_likes` (
   `user_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `post_likes`
+--
+
+INSERT INTO `post_likes` (`id`, `post_id`, `user_id`, `created_at`) VALUES
+(1, 1, 1, '2025-12-25 11:32:53');
 
 -- --------------------------------------------------------
 
@@ -273,7 +352,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `category`, `price`, `image_url`, `stock`, `related_plant_catalog_id`, `created_at`, `updated_at`) VALUES
-(1, 'Monstera Deliciosa - Mature Plant', 'Beautiful mature Monstera plant, 30-40cm tall', 'plant', 29.99, 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400', 15, 1, '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
+(1, 'Monstera Deliciosa - Mature Plant', 'Beautiful mature Monstera plant, 30-40cm tall', 'plant', 29.99, 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400', 12, 1, '2025-12-13 21:22:26', '2025-12-25 10:26:35'),
 (2, 'Monstera Deliciosa Seeds', 'Premium Monstera seeds, pack of 5', 'seed', 9.99, 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400', 50, 1, '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
 (3, 'Snake Plant - Mature', 'Hardy Snake Plant, 25-30cm', 'plant', 19.99, 'https://images.unsplash.com/photo-1593691501777-1c0e0a1a3a1a?w=400', 20, 2, '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
 (4, 'Pothos Golden - Cuttings', 'Rooted Pothos cuttings, ready to plant', 'plant', 12.99, 'https://images.unsplash.com/photo-1519336056116-9e799c0a78b9?w=400', 30, 3, '2025-12-13 21:22:26', '2025-12-13 21:22:26'),
@@ -347,6 +426,13 @@ CREATE TABLE `user_plants` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Déchargement des données de la table `user_plants`
+--
+
+INSERT INTO `user_plants` (`id`, `user_id`, `plant_catalog_id`, `nickname_for_plant`, `is_from_marketplace`, `purchase_date`, `acquisition_type`, `last_watering_date`, `last_fertilizing_date`, `custom_watering_interval_days`, `custom_fertilizing_interval_days`, `room_location`, `notes`, `created_at`) VALUES
+(1, 1, 1, NULL, 1, '2025-12-25', 'plant', NULL, NULL, NULL, NULL, NULL, NULL, '2025-12-25 10:26:35');
+
+--
 -- Index pour les tables déchargées
 --
 
@@ -358,6 +444,15 @@ ALTER TABLE `cart_items`
   ADD UNIQUE KEY `unique_user_product` (`user_id`,`product_id`),
   ADD KEY `idx_user_id` (`user_id`),
   ADD KEY `idx_product_id` (`product_id`);
+
+--
+-- Index pour la table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD UNIQUE KEY `slug` (`slug`),
+  ADD KEY `idx_slug` (`slug`);
 
 --
 -- Index pour la table `comments`
@@ -427,6 +522,15 @@ ALTER TABLE `plant_catalog_images`
   ADD KEY `idx_display_order` (`display_order`);
 
 --
+-- Index pour la table `plant_category_assignments`
+--
+ALTER TABLE `plant_category_assignments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_assignment` (`plant_catalog_id`,`category_id`),
+  ADD KEY `idx_plant_catalog_id` (`plant_catalog_id`),
+  ADD KEY `idx_category_id` (`category_id`);
+
+--
 -- Index pour la table `posts`
 --
 ALTER TABLE `posts`
@@ -489,6 +593,12 @@ ALTER TABLE `cart_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT pour la table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT pour la table `comments`
 --
 ALTER TABLE `comments`
@@ -510,13 +620,13 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT pour la table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `plant_care_events`
@@ -528,25 +638,31 @@ ALTER TABLE `plant_care_events`
 -- AUTO_INCREMENT pour la table `plant_catalog`
 --
 ALTER TABLE `plant_catalog`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT pour la table `plant_catalog_images`
 --
 ALTER TABLE `plant_catalog_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+
+--
+-- AUTO_INCREMENT pour la table `plant_category_assignments`
+--
+ALTER TABLE `plant_category_assignments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `post_likes`
 --
 ALTER TABLE `post_likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `products`
@@ -570,7 +686,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT pour la table `user_plants`
 --
 ALTER TABLE `user_plants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Contraintes pour les tables déchargées
@@ -627,6 +743,13 @@ ALTER TABLE `plant_care_events`
 --
 ALTER TABLE `plant_catalog_images`
   ADD CONSTRAINT `plant_catalog_images_ibfk_1` FOREIGN KEY (`plant_catalog_id`) REFERENCES `plant_catalog` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `plant_category_assignments`
+--
+ALTER TABLE `plant_category_assignments`
+  ADD CONSTRAINT `plant_category_assignments_ibfk_1` FOREIGN KEY (`plant_catalog_id`) REFERENCES `plant_catalog` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `plant_category_assignments_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
 -- Contraintes pour la table `posts`
